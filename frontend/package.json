@@ -9,6 +9,7 @@
         "react-scripts": "5.0.1",
         "axios": "^1.6.5",
         "ogl": "^1.0.6",
+        "three": "^0.169.0",
         "react-pdf": "^7.6.0"
     },
     "scripts": {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import Ballpit from '../components/Ballpit';
 import '../styles/LandingPage.css';
 
 const LandingPage = () => {
@@ -29,7 +30,6 @@ const LandingPage = () => {
 
         const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-        // Наблюдаем только за заголовками и карточками
         if (sectionTitleRef.current) observer.observe(sectionTitleRef.current);
         if (sectionSubtitleRef.current) observer.observe(sectionSubtitleRef.current);
 
@@ -37,7 +37,6 @@ const LandingPage = () => {
             if (card) observer.observe(card);
         });
 
-        // НЕ наблюдаем за FAQ - они всегда видимы
         return () => observer.disconnect();
     }, []);
 
@@ -98,9 +97,29 @@ const LandingPage = () => {
     return (
         <div className="landing-page">
             <section className="hero-section">
+                {/* Ballpit фон */}
+                <div className="hero-ballpit-container">
+                    <Ballpit
+                        count={200}
+                        colors={[0x00e965, 0x667eea, 0x764ba2]}
+                        gravity={0.01}
+                        friction={0.9975}
+                        wallBounce={0.95}
+                        followCursor={false}
+                        minSize={0.4}
+                        maxSize={1.0}
+                        materialParams={{
+                            metalness: 0.5,
+                            roughness: 0.5,
+                            clearcoat: 1,
+                            clearcoatRoughness: 0.15
+                        }}
+                    />
+                </div>
+
+                {/* Контент поверх Ballpit */}
                 <div className="hero-content">
                     <h1 className="hero-title">Онлайн-библиотека Пионеров Башкортостана</h1>
-                    <p className="hero-subtitle"></p>
                     <p className="hero-description">
                         Читайте, сохраняйте и делитесь впечатлениями о любимых произведениях
                     </p>

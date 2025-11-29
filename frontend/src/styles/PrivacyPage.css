@@ -1,0 +1,171 @@
+/* ==================== PRIVACY PAGE ==================== */
+.privacy-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 80px 24px;
+    background: var(--background);
+    transition: background 0.3s ease;
+}
+
+.privacy-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.privacy-title {
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    color: var(--foreground);
+    margin: 0 0 40px 0;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    transition: color 0.3s ease;
+}
+
+.privacy-section {
+    margin-bottom: 40px;
+}
+
+.privacy-section:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-section h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--foreground);
+    margin: 0 0 16px 0;
+    line-height: 1.3;
+    transition: color 0.3s ease;
+}
+
+.privacy-section p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--muted-foreground);
+    margin: 0 0 16px 0;
+    transition: color 0.3s ease;
+}
+
+.privacy-section p:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-section ul {
+    list-style: disc;
+    padding-left: 24px;
+    margin: 0 0 16px 0;
+}
+
+.privacy-section ul li {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--muted-foreground);
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
+}
+
+.privacy-section ul li:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-section strong {
+    font-weight: 600;
+    color: var(--foreground);
+    transition: color 0.3s ease;
+}
+
+.privacy-section a {
+    color: var(--primary);
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.privacy-section a:hover {
+    opacity: 0.8;
+}
+
+/* ==================== DARK THEME ==================== */
+.dark .privacy-page {
+    background: #0a0a0a;
+}
+
+.dark .privacy-container {
+    background: #2a2a2a;
+    border-color: #404040;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.dark .privacy-title,
+.dark .privacy-section h2,
+.dark .privacy-section strong {
+    color: #ffffff;
+}
+
+.dark .privacy-section p,
+.dark .privacy-section ul li {
+    color: #d0d0d0;
+}
+
+.dark .privacy-section a {
+    color: #a98fff;
+}
+
+.dark .privacy-section a:hover {
+    color: #c4b0ff;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .privacy-page {
+        padding: 48px 24px;
+    }
+
+    .privacy-container {
+        padding: 32px 24px;
+    }
+
+    .privacy-title {
+        font-size: clamp(28px, 6vw, 36px);
+        margin-bottom: 32px;
+    }
+
+    .privacy-section h2 {
+        font-size: 20px;
+    }
+
+    .privacy-section p,
+    .privacy-section ul li {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .privacy-page {
+        padding: 32px 16px;
+    }
+
+    .privacy-container {
+        padding: 24px 16px;
+        border-radius: 12px;
+    }
+
+    .privacy-section ul {
+        padding-left: 20px;
+    }
+
+    .privacy-section h2 {
+        font-size: 18px;
+    }
+
+    .privacy-section p,
+    .privacy-section ul li {
+        font-size: 14px;
+    }
+}

@@ -26,10 +26,10 @@ const ExchangePage = () => {
             {/* Hero Section */}
             <div className="exchange-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">

@@ -1,6 +1,6 @@
 /* ============================================
    APPLE PRO STYLE - PERFECT EDITION 2025
-   Clean & Consistent Design
+   Clean & Consistent Design with Ballpit
 ============================================ */
 
 :root {
@@ -115,10 +115,14 @@ html {
     transition: background-color 0.3s ease;
 }
 
-/* Hero Section */
+/* ============================================
+   Hero Section with Ballpit
+============================================ */
+
 .hero-section {
     position: relative;
     height: 100vh;
+    min-height: 700px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -135,15 +139,40 @@ html {
     height: 20%;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
     pointer-events: none;
+    z-index: 2;
 }
 
+/* Ballpit Container - фоновый слой */
+.hero-ballpit-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-ballpit-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Hero Content - поверх Ballpit */
 .hero-content {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     text-align: center;
     padding: 0 var(--spacing-md);
     max-width: 980px;
     margin: 0 auto;
+    pointer-events: none;
+    /* Позволяет взаимодействовать с Ballpit */
+}
+
+/* Все интерактивные элементы внутри hero-content */
+.hero-content * {
+    pointer-events: auto;
 }
 
 .hero-title {
@@ -156,7 +185,7 @@ html {
     margin-bottom: var(--spacing-sm);
     opacity: 0;
     animation: fadeInUp 1s 0.2s var(--transition-smooth) forwards;
-    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .hero-subtitle {
@@ -168,22 +197,23 @@ html {
     margin-bottom: var(--spacing-lg);
     opacity: 0;
     animation: fadeInUp 1s 0.4s var(--transition-smooth) forwards;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
 }
 
 .hero-description {
-    font-size: 19px;
+    font-size: clamp(18px, 2.5vw, 21px);
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.9);
     margin-bottom: var(--spacing-xl);
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
     opacity: 0;
     animation: fadeInUp 1s 0.6s var(--transition-smooth) forwards;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Кнопки - АБСОЛЮТНО ОДИНАКОВЫЕ */
+/* Hero Actions - Кнопки */
 .hero-actions {
     display: flex;
     gap: var(--spacing-sm);
@@ -193,7 +223,7 @@ html {
     animation: fadeInUp 1s 0.8s var(--transition-smooth) forwards;
 }
 
-/* ОДИН ОБЩИЙ КЛАСС для обеих кнопок */
+/* Одинаковые стили для обеих кнопок */
 .btn-primary,
 .btn-secondary {
     display: inline-flex;
@@ -217,7 +247,7 @@ html {
     transition: all 0.4s var(--transition-smooth);
 }
 
-/* Shine эффект - одинаковый */
+/* Shine эффект */
 .btn-primary::before,
 .btn-secondary::before {
     content: '';
@@ -232,7 +262,6 @@ html {
     z-index: 0;
 }
 
-/* Hover - одинаковый */
 .btn-primary:hover::before,
 .btn-secondary:hover::before {
     left: 100%;
@@ -246,20 +275,21 @@ html {
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 }
 
-/* Active - одинаковый */
 .btn-primary:active,
 .btn-secondary:active {
     transform: translateY(0) scale(0.98);
 }
 
-/* Текст */
 .btn-primary>span,
 .btn-secondary>span {
     position: relative;
     z-index: 1;
 }
 
-/* Features Section */
+/* ============================================
+   Features Section
+============================================ */
+
 .features-section {
     padding: var(--spacing-3xl) var(--spacing-md);
     max-width: 1400px;
@@ -452,7 +482,10 @@ html {
     gap: 10px;
 }
 
-/* FAQ Section */
+/* ============================================
+   FAQ Section
+============================================ */
+
 .faq-section {
     padding: var(--spacing-2xl) var(--spacing-md);
     max-width: 980px;
@@ -465,7 +498,6 @@ html {
     gap: var(--spacing-sm);
 }
 
-/* ИСПРАВЛЕНО: FAQ больше не исчезают */
 .faq-accordion {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -474,7 +506,6 @@ html {
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
-    /* ВАЖНО: НЕТ opacity и transform - элемент всегда видим */
     transition: box-shadow 0.3s var(--transition-smooth),
         background 0.3s ease,
         border-color 0.3s ease;
@@ -524,7 +555,6 @@ html {
     color: #667eea;
 }
 
-/* ИСПРАВЛЕНО: простая анимация без конфликтов */
 .faq-accordion-body {
     max-height: 0;
     overflow: hidden;
@@ -543,7 +573,10 @@ html {
     transition: color 0.3s ease;
 }
 
-/* Анимации */
+/* ============================================
+   Animations
+============================================ */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -556,7 +589,10 @@ html {
     }
 }
 
-/* Responsive */
+/* ============================================
+   Responsive Design
+============================================ */
+
 @media (max-width: 1024px) {
     .features-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -565,9 +601,17 @@ html {
 
 @media (max-width: 768px) {
     .hero-section {
-        height: auto;
-        min-height: 100vh;
-        padding: var(--spacing-3xl) var(--spacing-md);
+        min-height: 600px;
+    }
+
+    .hero-title {
+        font-size: clamp(36px, 10vw, 56px);
+        margin-bottom: 16px;
+    }
+
+    .hero-description {
+        font-size: clamp(16px, 4vw, 18px);
+        margin-bottom: 32px;
     }
 
     .features-grid {
@@ -577,6 +621,8 @@ html {
     .hero-actions {
         flex-direction: column;
         width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
     }
 
     .btn-primary,
@@ -590,7 +636,10 @@ html {
     }
 }
 
-/* Accessibility */
+/* ============================================
+   Accessibility
+============================================ */
+
 @media (prefers-reduced-motion: reduce) {
 
     *,
@@ -607,4 +656,10 @@ html {
 .btn-secondary:focus-visible {
     outline: 3px solid rgba(255, 255, 255, 0.5);
     outline-offset: 4px;
+}
+
+.feature-card:focus-visible,
+.faq-accordion-header:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
 }
