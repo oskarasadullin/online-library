@@ -1,0 +1,139 @@
+/* ==================== SECTIONS PAGE ==================== */
+.sections-page {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    background: var(--bg-primary);
+}
+
+/* Постоянный градиентный фон - закрывает hero высоту */
+.sections-permanent-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 700px;
+    /* Покрывает hero высоту */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.sections-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Остальные стили без изменений */
+.sections-nav {
+    background: var(--nav-bg);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--nav-border);
+    position: sticky;
+    top: var(--nav-height);
+    z-index: 999;
+    transition: background var(--nav-speed) ease, border-color var(--nav-speed) ease;
+    box-shadow: var(--nav-shadow);
+}
+
+.sections-tabs {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    list-style: none;
+    height: var(--nav-height);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.sections-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.section-tab {
+    color: var(--nav-text-secondary);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: var(--btn-radius);
+    text-decoration: none;
+    transition: all var(--nav-speed) var(--nav-transition);
+    font-family: var(--nav-font);
+    position: relative;
+    white-space: nowrap;
+}
+
+.section-tab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--nav-hover);
+    border-radius: var(--btn-radius);
+    opacity: 0;
+    transition: opacity var(--nav-speed) var(--nav-transition);
+}
+
+.section-tab:hover {
+    color: var(--nav-text);
+}
+
+.section-tab:hover::before {
+    opacity: 1;
+}
+
+.section-tab.active {
+    color: var(--nav-text);
+    background: var(--nav-active);
+    font-weight: 600;
+}
+
+.section-content {
+    animation: fadeIn 0.4s ease;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .sections-nav {
+        top: 60px;
+    }
+
+    .sections-tabs {
+        padding: 0 16px;
+        justify-content: flex-start;
+    }
+
+    .section-tab {
+        font-size: 14px;
+        padding: 8px 14px;
+    }
+
+    .sections-permanent-background {
+        height: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sections-tabs {
+        padding: 0 12px;
+    }
+}

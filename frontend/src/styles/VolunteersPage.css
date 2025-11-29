@@ -1,0 +1,399 @@
+/* ==================== VOLUNTEERS PAGE - APPLE PRO STYLE ==================== */
+.volunteers-page {
+    width: 100%;
+    overflow: hidden;
+}
+
+/* ==================== HERO SECTION ==================== */
+.volunteers-hero {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 600px;
+    padding: var(--spacing-3xl) var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+    overflow: hidden;
+    background: var(--gradient-primary);
+}
+
+.hero-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 20%,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            transparent 70%);
+    animation: gradientShift 8s ease-in-out infinite;
+}
+
+.hero-blur {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: float 20s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    33% {
+        transform: translate(30px, -30px);
+    }
+
+    66% {
+        transform: translate(-20px, 20px);
+    }
+}
+
+.hero-content-wrapper {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-xl);
+    max-width: 1400px;
+    width: 100%;
+}
+
+.hero-content {
+    flex: 1;
+    max-width: 600px;
+}
+
+.hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 6vw, 80px);
+    font-weight: 700;
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--apple-white);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.hero-subtitle {
+    font-size: clamp(17px, 2vw, 21px);
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin: 0;
+    font-weight: 400;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Hero Illustration - Three Characters with Puzzles */
+.hero-image {
+    flex: 0 0 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 500px;
+}
+
+.hero-illustration-volunteers {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.volunteer-character {
+    width: 120px;
+    height: 180px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 60px 60px 30px 30px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 30px;
+    position: relative;
+}
+
+.character-1 {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    animation: character1Float 6s ease-in-out infinite;
+}
+
+.character-2 {
+    background: linear-gradient(135deg, #00e965, #00a049);
+    animation: character2Float 6s ease-in-out infinite 0.2s;
+    margin-top: -30px;
+}
+
+.character-3 {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    animation: character3Float 6s ease-in-out infinite 0.4s;
+}
+
+@keyframes character1Float {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-20px) scale(1.02);
+    }
+}
+
+@keyframes character2Float {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-25px) scale(1.03);
+    }
+}
+
+@keyframes character3Float {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-20px) scale(1.02);
+    }
+}
+
+.volunteer-character::before {
+    content: '👤';
+    position: absolute;
+    top: 15px;
+    font-size: 40px;
+}
+
+.puzzle-piece {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 70px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    animation: puzzleFloat 3s ease-in-out infinite;
+}
+
+.piece-green {
+    background: linear-gradient(135deg, #00e965, #00a049);
+}
+
+.piece-yellow {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.piece-blue {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+@keyframes puzzleFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(5deg);
+    }
+}
+
+/* Puzzle piece shape */
+.puzzle-piece::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: inherit;
+    border-radius: 50%;
+}
+
+.puzzle-piece::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+}
+
+/* ==================== CONTENT SECTION ==================== */
+.volunteers-content-section {
+    padding: var(--spacing-2xl) var(--spacing-md);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 4vw, 48px);
+    font-weight: 700;
+    margin: 0 0 var(--spacing-xl) 0;
+    color: var(--apple-text-primary);
+    letter-spacing: -0.02em;
+    transition: color 0.3s ease;
+}
+
+.content-placeholder {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--glass-shadow);
+}
+
+.placeholder-text {
+    font-size: 19px;
+    color: var(--apple-text-secondary);
+    text-align: center;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) translateZ(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+    }
+}
+
+.hero-title {
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.1s both;
+}
+
+.hero-subtitle {
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.25s both;
+}
+
+.hero-image {
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.4s both;
+}
+
+.section-title {
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.2s both;
+}
+
+.content-placeholder {
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.35s both;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+    .hero-content-wrapper {
+        gap: var(--spacing-lg);
+    }
+
+    .hero-image {
+        flex: 0 0 350px;
+    }
+
+    .volunteer-character {
+        width: 100px;
+        height: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .volunteers-hero {
+        padding: var(--spacing-2xl) var(--spacing-md);
+    }
+
+    .hero-content-wrapper {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-xl);
+    }
+
+    .hero-image {
+        flex: 0 0 auto;
+        height: 400px;
+    }
+
+    .hero-illustration-volunteers {
+        gap: 10px;
+    }
+
+    .volunteer-character {
+        width: 80px;
+        height: 130px;
+    }
+
+    .volunteer-character::before {
+        font-size: 32px;
+    }
+
+    .puzzle-piece {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

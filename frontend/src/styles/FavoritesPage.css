@@ -1,0 +1,319 @@
+/* ============================================
+   APPLE PRO FAVORITES PAGE - GRADIENT HEADERS
+   Perfect Contrast for Light & Dark
+============================================ */
+
+:root {
+    /* Light Theme - По умолчанию */
+    --fav-primary: #667eea;
+    --fav-secondary: #764ba2;
+    --fav-text: #1d1d1f;
+    --fav-text-secondary: #6e6e73;
+    --fav-bg: #ffffff;
+    --fav-surface: #f5f5f7;
+    --fav-border: rgba(0, 0, 0, 0.1);
+    --fav-hover: rgba(0, 0, 0, 0.05);
+
+    /* Gradient для заголовков - ТЕМНЫЙ на светлом фоне */
+    --fav-gradient-text: linear-gradient(135deg, #1d1d1f 0%, #667eea 50%, #764ba2 100%);
+
+    /* Glassmorphism */
+    --fav-glass-bg: rgba(255, 255, 255, 0.8);
+    --fav-glass-blur: saturate(180%) blur(20px);
+
+    /* Shadows */
+    --fav-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --fav-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --fav-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+
+    /* Typography */
+    --fav-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+
+    /* Spacing */
+    --fav-spacing-sm: 12px;
+    --fav-spacing-md: 20px;
+    --fav-spacing-lg: 32px;
+    --fav-spacing-xl: 48px;
+    --fav-spacing-2xl: 80px;
+
+    /* Radius */
+    --fav-radius: 12px;
+    --fav-radius-lg: 16px;
+
+    /* Transitions */
+    --fav-transition: cubic-bezier(0.28, 0.11, 0.32, 1);
+    --fav-speed: 0.4s;
+}
+
+/* Dark Theme */
+[data-theme='dark'] {
+    --fav-text: #f5f5f7;
+    --fav-text-secondary: #98989d;
+    --fav-bg: #000000;
+    --fav-surface: #1c1c1e;
+    --fav-border: rgba(255, 255, 255, 0.15);
+    --fav-hover: rgba(255, 255, 255, 0.08);
+
+    /* Gradient для заголовков - СВЕТЛЫЙ на темном фоне */
+    --fav-gradient-text: linear-gradient(135deg, #ffffff 0%, #667eea 50%, #764ba2 100%);
+
+    --fav-glass-bg: rgba(28, 28, 30, 0.8);
+    --fav-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --fav-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --fav-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --fav-text: #f5f5f7;
+        --fav-text-secondary: #98989d;
+        --fav-bg: #000000;
+        --fav-surface: #1c1c1e;
+        --fav-border: rgba(255, 255, 255, 0.15);
+        --fav-hover: rgba(255, 255, 255, 0.08);
+        --fav-gradient-text: linear-gradient(135deg, #ffffff 0%, #667eea 50%, #764ba2 100%);
+        --fav-glass-bg: rgba(28, 28, 30, 0.8);
+        --fav-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+        --fav-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+        --fav-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+}
+
+/* Page Container */
+.favorites-page {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--fav-bg);
+    transition: background var(--fav-speed) ease;
+    position: relative;
+}
+
+/* Subtle Background Gradient */
+.favorites-page::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 500px;
+    background: radial-gradient(circle at 50% 0%, rgba(102, 126, 234, 0.03), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.favorites-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--fav-spacing-2xl) var(--fav-spacing-md);
+    position: relative;
+    z-index: 1;
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: var(--fav-spacing-2xl);
+    opacity: 0;
+    animation: fadeInUp 0.8s 0.1s var(--fav-transition) forwards;
+}
+
+.page-header h1 {
+    font-family: var(--fav-font);
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--fav-spacing-md);
+
+    /* КРАСИВЫЙ ГРАДИЕНТ */
+    background: var(--fav-gradient-text);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+}
+
+.page-subtitle {
+    font-size: clamp(18px, 2.5vw, 24px);
+    line-height: 1.5;
+    font-weight: 400;
+    letter-spacing: 0.005em;
+    color: var(--fav-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Books Grid */
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--fav-spacing-lg);
+    opacity: 0;
+    animation: fadeInUp 0.8s 0.2s var(--fav-transition) forwards;
+}
+
+/* Empty State */
+.favorites-empty {
+    text-align: center;
+    padding: var(--fav-spacing-2xl) var(--fav-spacing-md);
+    opacity: 0;
+    animation: fadeInUp 0.8s var(--fav-transition) forwards;
+}
+
+.favorites-empty-icon {
+    font-size: 80px;
+    margin-bottom: var(--fav-spacing-lg);
+    opacity: 0.6;
+    filter: grayscale(0.3);
+}
+
+.favorites-empty-title {
+    font-family: var(--fav-font);
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--fav-text);
+    margin: 0 0 var(--fav-spacing-md);
+}
+
+.favorites-empty-text {
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--fav-text-secondary);
+    margin: 0 0 var(--fav-spacing-2xl);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.favorites-empty-button {
+    height: 52px;
+    padding: 0 36px;
+    font-size: 17px;
+    font-weight: 600;
+    font-family: var(--fav-font);
+    color: white;
+    background: linear-gradient(135deg, var(--fav-primary) 0%, var(--fav-secondary) 100%);
+    border: none;
+    border-radius: var(--fav-radius);
+    cursor: pointer;
+    transition: all var(--fav-speed) var(--fav-transition);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favorites-empty-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s var(--fav-transition);
+}
+
+.favorites-empty-button:hover::before {
+    left: 100%;
+}
+
+.favorites-empty-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+}
+
+.favorites-empty-button:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Loading State */
+.favorites-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--fav-spacing-2xl) var(--fav-spacing-md);
+    min-height: 400px;
+}
+
+.loading-spinner {
+    width: 52px;
+    height: 52px;
+    border: 3px solid var(--fav-border);
+    border-top-color: var(--fav-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: var(--fav-spacing-lg);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--fav-text-secondary);
+    font-family: var(--fav-font);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .favorites-container {
+        padding: var(--fav-spacing-xl) var(--fav-spacing-md);
+    }
+
+    .favorites-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: var(--fav-spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: clamp(32px, 8vw, 48px);
+    }
+
+    .favorites-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .favorites-container {
+        padding: var(--fav-spacing-lg) var(--fav-spacing-sm);
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
