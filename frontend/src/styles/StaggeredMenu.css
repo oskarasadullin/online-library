@@ -1,0 +1,611 @@
+/* ============================================
+   STAGGERED MENU - Актуализированная версия
+============================================ */
+
+:root {
+    --sm-accent: #00e965;
+}
+
+.staggered-menu-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.staggered-menu-wrapper.fixed-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.staggered-menu-wrapper.fixed-wrapper>* {
+    pointer-events: auto;
+}
+
+/* ============================================
+   Header & Logo
+============================================ */
+
+.staggered-menu-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    background: transparent;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.staggered-menu-header>* {
+    pointer-events: auto;
+}
+
+.sm-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--apple-text-primary, #1d1d1f);
+    transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+[data-theme='dark'] .sm-logo {
+    color: #f5f5f7;
+}
+
+.sm-logo:hover {
+    opacity: 0.8;
+}
+
+.sm-logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* ============================================
+   Toggle Button
+============================================ */
+
+.sm-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--apple-text-primary, #1d1d1f);
+    font-weight: 600;
+    font-size: 16px;
+    padding: 8px 12px;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    border-radius: 8px;
+}
+
+[data-theme='dark'] .sm-toggle {
+    color: #f5f5f7;
+}
+
+.sm-toggle:hover {
+    opacity: 0.8;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .sm-toggle:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sm-toggle:focus-visible {
+    outline: 2px solid var(--sm-accent);
+    outline-offset: 2px;
+}
+
+.sm-toggle-textWrap {
+    position: relative;
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 60px;
+}
+
+.sm-toggle-textInner {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.sm-toggle-line {
+    display: block;
+    height: 1em;
+    line-height: 1;
+}
+
+.sm-icon {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sm-icon-line {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transform: translate(-50%, -50%);
+}
+
+/* ============================================
+   Panel Layers (Background)
+============================================ */
+
+.sm-prelayers {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: clamp(320px, 42vw, 520px);
+    pointer-events: none;
+    z-index: 999;
+}
+
+[data-position='left'] .sm-prelayers {
+    right: auto;
+    left: 0;
+}
+
+.sm-prelayer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+}
+
+/* ============================================
+   Main Panel
+============================================ */
+
+.staggered-menu-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: clamp(320px, 42vw, 520px);
+    height: 100%;
+    background: var(--bg-primary, #ffffff);
+    display: flex;
+    flex-direction: column;
+    padding: 6rem 2.5rem 2.5rem;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
+    transition: background 0.3s ease;
+}
+
+[data-theme='dark'] .staggered-menu-panel {
+    background: var(--bg-primary, #1a1a1a);
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-position='left'] .staggered-menu-panel {
+    right: auto;
+    left: 0;
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.12);
+}
+
+.sm-panel-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ============================================
+   Menu Items
+============================================ */
+
+.sm-panel-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sm-panel-itemWrap {
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+}
+
+.sm-panel-item {
+    position: relative;
+    color: var(--text-primary, #1d1d1f);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 6vw, 3.5rem);
+    cursor: pointer;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+    padding-right: 1.5em;
+}
+
+[data-theme='dark'] .sm-panel-item {
+    color: #f5f5f7;
+}
+
+.sm-panel-itemLabel {
+    display: inline-block;
+    will-change: transform;
+    transform-origin: 50% 100%;
+}
+
+.sm-panel-item:hover,
+.sm-panel-item.active {
+    color: var(--sm-accent, #00e965);
+}
+
+/* Item Numbering */
+.sm-panel-list[data-numbering] {
+    counter-reset: smItem;
+}
+
+.sm-panel-list[data-numbering] .sm-panel-item::after {
+    counter-increment: smItem;
+    content: counter(smItem, decimal-leading-zero);
+    position: absolute;
+    top: 0.15em;
+    right: 0.3em;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--sm-accent, #00e965);
+    letter-spacing: 0;
+    pointer-events: none;
+    user-select: none;
+    opacity: var(--sm-num-opacity, 0);
+    transition: opacity 0.3s ease;
+}
+
+/* ============================================
+   User Section
+============================================ */
+
+.sm-user-section {
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-color, rgba(0, 0, 0, 0.1));
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+[data-theme='dark'] .sm-user-section {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.sm-user-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg-secondary, #f5f5f7);
+    border-radius: 14px;
+    transition: background 0.3s ease;
+}
+
+[data-theme='dark'] .sm-user-info {
+    background: var(--bg-secondary, #2a2a2a);
+}
+
+.sm-user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.sm-user-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary, #1d1d1f);
+    transition: color 0.3s ease;
+}
+
+[data-theme='dark'] .sm-user-name {
+    color: #f5f5f7;
+}
+
+/* ============================================
+   Actions (Theme & Auth)
+============================================ */
+
+.sm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sm-theme-btn,
+.sm-auth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.28, 0.11, 0.32, 1);
+    text-decoration: none;
+}
+
+.sm-theme-btn {
+    background: var(--bg-secondary, #f5f5f7);
+    color: var(--text-primary, #1d1d1f);
+    border: 2px solid transparent;
+}
+
+[data-theme='dark'] .sm-theme-btn {
+    background: var(--bg-secondary, #2a2a2a);
+    color: #f5f5f7;
+}
+
+.sm-theme-btn:hover {
+    background: var(--hover-bg, #e5e5e5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .sm-theme-btn:hover {
+    background: var(--hover-bg, #3a3a3a);
+}
+
+.sm-theme-icon {
+    font-size: 20px;
+}
+
+.sm-theme-text {
+    font-size: 15px;
+}
+
+.sm-auth-btn.login {
+    background: var(--primary-green, #00e965);
+    color: #1d1d1f;
+    font-weight: 700;
+}
+
+.sm-auth-btn.login:hover {
+    background: var(--light-green, #66ffaa);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 233, 101, 0.3);
+}
+
+.sm-auth-btn.logout {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 2px solid rgba(255, 68, 68, 0.3);
+    font-weight: 600;
+}
+
+.sm-auth-btn.logout:hover {
+    background: rgba(255, 68, 68, 0.15);
+    border-color: rgba(255, 68, 68, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 68, 68, 0.2);
+}
+
+/* ============================================
+   Responsive
+============================================ */
+
+@media (max-width: 1024px) {
+
+    .staggered-menu-panel,
+    .sm-prelayers {
+        width: 100%;
+    }
+
+    .sm-panel-item {
+        font-size: clamp(2rem, 8vw, 2.8rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .staggered-menu-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .staggered-menu-panel {
+        padding: 5rem 1.5rem 1.5rem;
+    }
+
+    .sm-panel-item {
+        font-size: clamp(1.8rem, 10vw, 2.2rem);
+        letter-spacing: -1px;
+    }
+
+    .sm-logo-text {
+        font-size: 18px;
+    }
+
+    .sm-actions {
+        gap: 10px;
+    }
+
+    .sm-theme-btn,
+    .sm-auth-btn {
+        padding: 13px 20px;
+        font-size: 15px;
+    }
+}
+
+/* ============================================
+   Accessibility
+============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+.sm-panel-item:focus-visible,
+.sm-theme-btn:focus-visible,
+.sm-auth-btn:focus-visible {
+    outline: 3px solid var(--sm-accent, #00e965);
+    outline-offset: 3px;
+}
+
+/* ============================================
+   Submenu (Подкатегории)
+============================================ */
+
+.sm-submenu-wrapper {
+    width: 100%;
+}
+
+.sm-panel-item.submenu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sm-submenu-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--sm-accent, #00e965);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.sm-panel-item.submenu-toggle.expanded .sm-submenu-arrow {
+    transform: rotate(180deg);
+}
+
+.sm-submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.28, 0.11, 0.32, 1);
+}
+
+.sm-submenu.expanded {
+    max-height: 800px;
+    margin-top: 1rem;
+}
+
+.sm-submenu-item {
+    margin-bottom: 0.5rem;
+}
+
+.sm-submenu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-secondary, #f5f5f7);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary, #1d1d1f);
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+[data-theme='dark'] .sm-submenu-link {
+    background: var(--bg-secondary, #2a2a2a);
+    color: #f5f5f7;
+}
+
+.sm-submenu-link:hover {
+    background: var(--hover-bg, #e5e5e5);
+    transform: translateX(4px);
+    border-color: var(--sm-accent, #00e965);
+}
+
+[data-theme='dark'] .sm-submenu-link:hover {
+    background: var(--hover-bg, #3a3a3a);
+}
+
+.sm-submenu-link.active {
+    background: var(--sm-accent, #00e965);
+    color: #1d1d1f;
+    font-weight: 700;
+    transform: translateX(4px);
+}
+
+.sm-submenu-icon {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.sm-submenu-label {
+    flex: 1;
+}
+
+/* Responsive для подменю */
+@media (max-width: 768px) {
+    .sm-submenu-link {
+        padding: 10px 14px;
+        font-size: 15px;
+    }
+
+    .sm-submenu-icon {
+        font-size: 18px;
+        width: 24px;
+        height: 24px;
+    }
+
+    .sm-submenu.expanded {
+        margin-top: 0.75rem;
+    }
+}

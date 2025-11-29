@@ -2503,7 +2503,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import Navigation from './components/Navigation';
+import StaggeredMenu from './components/StaggeredMenu';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import BooksPage from './pages/BooksPage';
@@ -2511,8 +2511,8 @@ import BookDetailPage from './pages/BookDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import AuthPage from './pages/AuthPage';
 import AdminPage from './pages/AdminPage';
-import PrivacyPage from './pages/PrivacyPage'; // ✅ ДОБАВЛЕНО
-import SectionsPage from './pages/SectionsPage';
+import PrivacyPage from './pages/PrivacyPage';
+// Разделы напрямую
 import MethodClubPage from './pages/sections/MethodClubPage';
 import PioneersWorkPage from './pages/sections/PioneersWorkPage';
 import SchoolLeadersPage from './pages/sections/SchoolLeadersPage';
@@ -2532,36 +2532,43 @@ function App() {
             <AuthProvider>
                 <Router>
                     <div className="app">
-                        <Navigation />
+                        {/* Анимированное меню с подкатегориями */}
+                        <StaggeredMenu
+                            position="right"
+                            colors={['#667eea', '#764ba2']}
+                            logoText="📚 Библиотека Пионеров"
+                            displayItemNumbering={true}
+                            accentColor="#00e965"
+                            menuButtonColor="#1d1d1f"
+                            openMenuButtonColor="#1d1d1f"
+                            changeMenuColorOnOpen={false}
+                            closeOnClickAway={true}
+                        />
+
                         <main className="main-content">
                             <Routes>
+                                {/* Основные страницы */}
                                 <Route path="/" element={<LandingPage />} />
                                 <Route path="/books" element={<BooksPage />} />
                                 <Route path="/books/:id" element={<BookDetailPage />} />
                                 <Route path="/favorites" element={<FavoritesPage />} />
                                 <Route path="/auth" element={<AuthPage />} />
                                 <Route path="/admin" element={<AdminPage />} />
-                                <Route path="/privacy" element={<PrivacyPage />} /> {/* ✅ ДОБАВЛЕНО */}
+                                <Route path="/privacy" element={<PrivacyPage />} />
 
-                                {/* Разделы */}
-                                <Route path="/sections/*" element={
-                                    <SectionsPage>
-                                        <Routes>
-                                            <Route path="methodclub" element={<MethodClubPage />} />
-                                            <Route path="pioneers" element={<PioneersWorkPage />} />
-                                            <Route path="leaders" element={<SchoolLeadersPage />} />
-                                            <Route path="volunteers" element={<VolunteersPage />} />
-                                            <Route path="media" element={<SchoolMediaPage />} />
-                                            <Route path="games" element={<GamesPage />} />
-                                            <Route path="scenarios" element={<ScenariosPage />} />
-                                            <Route path="book" element={<PioneerBookPage />} />
-                                            <Route path="exchange" element={<ExchangePage />} />
-                                            <Route path="contacts" element={<ContactsPage />} />
-                                            <Route path="calendar" element={<CalendarPage />} />
-                                            <Route path="documents" element={<DocumentsPage />} />
-                                        </Routes>
-                                    </SectionsPage>
-                                } />
+                                {/* Разделы - прямые роуты без обертки */}
+                                <Route path="/sections/methodclub" element={<MethodClubPage />} />
+                                <Route path="/sections/pioneers" element={<PioneersWorkPage />} />
+                                <Route path="/sections/leaders" element={<SchoolLeadersPage />} />
+                                <Route path="/sections/volunteers" element={<VolunteersPage />} />
+                                <Route path="/sections/media" element={<SchoolMediaPage />} />
+                                <Route path="/sections/games" element={<GamesPage />} />
+                                <Route path="/sections/scenarios" element={<ScenariosPage />} />
+                                <Route path="/sections/book" element={<PioneerBookPage />} />
+                                <Route path="/sections/exchange" element={<ExchangePage />} />
+                                <Route path="/sections/contacts" element={<ContactsPage />} />
+                                <Route path="/sections/calendar" element={<CalendarPage />} />
+                                <Route path="/sections/documents" element={<DocumentsPage />} />
                             </Routes>
                         </main>
                         <Footer />
@@ -2686,6 +2693,753 @@ root.render(
         <App />
     </React.StrictMode>
 );
+
+
+
+==== FILE: .\frontend\src\components\Ballpit.js ====
+import { useRef, useEffect } from 'react';
+import {
+    Clock as e,
+    PerspectiveCamera as t,
+    Scene as i,
+    WebGLRenderer as s,
+    SRGBColorSpace as n,
+    MathUtils as o,
+    Vector2 as r,
+    Vector3 as a,
+    MeshPhysicalMaterial as c,
+    ShaderChunk as h,
+    Color as l,
+    Object3D as m,
+    InstancedMesh as d,
+    PMREMGenerator as p,
+    SphereGeometry as g,
+    AmbientLight as f,
+    PointLight as u,
+    ACESFilmicToneMapping as v,
+    Raycaster as y,
+    Plane as w
+} from 'three';
+import { RoomEnvironment as z } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+class x {
+    #e;
+    canvas;
+    camera;
+    cameraMinAspect;
+    cameraMaxAspect;
+    cameraFov;
+    maxPixelRatio;
+    minPixelRatio;
+    scene;
+    renderer;
+    #t;
+    size = { width: 0, height: 0, wWidth: 0, wHeight: 0, ratio: 0, pixelRatio: 0 };
+    render = this.#i;
+    onBeforeRender = () => { };
+    onAfterRender = () => { };
+    onAfterResize = () => { };
+    #s = false;
+    #n = false;
+    isDisposed = false;
+    #o;
+    #r;
+    #a;
+    #c = new e();
+    #h = { elapsed: 0, delta: 0 };
+    #l;
+    constructor(e) {
+        this.#e = { ...e };
+        this.#m();
+        this.#d();
+        this.#p();
+        this.resize();
+        this.#g();
+    }
+    #m() {
+        this.camera = new t();
+        this.cameraFov = this.camera.fov;
+    }
+    #d() {
+        this.scene = new i();
+    }
+    #p() {
+        if (this.#e.canvas) {
+            this.canvas = this.#e.canvas;
+        } else if (this.#e.id) {
+            this.canvas = document.getElementById(this.#e.id);
+        } else {
+            console.error('Three: Missing canvas or id parameter');
+        }
+        this.canvas.style.display = 'block';
+        const e = {
+            canvas: this.canvas,
+            powerPreference: 'high-performance',
+            ...(this.#e.rendererOptions ?? {})
+        };
+        this.renderer = new s(e);
+        this.renderer.outputColorSpace = n;
+    }
+    #g() {
+        if (!(this.#e.size instanceof Object)) {
+            window.addEventListener('resize', this.#f.bind(this));
+            if (this.#e.size === 'parent' && this.canvas.parentNode) {
+                this.#r = new ResizeObserver(this.#f.bind(this));
+                this.#r.observe(this.canvas.parentNode);
+            }
+        }
+        this.#o = new IntersectionObserver(this.#u.bind(this), {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0
+        });
+        this.#o.observe(this.canvas);
+        document.addEventListener('visibilitychange', this.#v.bind(this));
+    }
+    #y() {
+        window.removeEventListener('resize', this.#f.bind(this));
+        this.#r?.disconnect();
+        this.#o?.disconnect();
+        document.removeEventListener('visibilitychange', this.#v.bind(this));
+    }
+    #u(e) {
+        this.#s = e[0].isIntersecting;
+        this.#s ? this.#w() : this.#z();
+    }
+    #v() {
+        if (this.#s) {
+            document.hidden ? this.#z() : this.#w();
+        }
+    }
+    #f() {
+        if (this.#a) clearTimeout(this.#a);
+        this.#a = setTimeout(this.resize.bind(this), 100);
+    }
+    resize() {
+        let e, t;
+        if (this.#e.size instanceof Object) {
+            e = this.#e.size.width;
+            t = this.#e.size.height;
+        } else if (this.#e.size === 'parent' && this.canvas.parentNode) {
+            e = this.canvas.parentNode.offsetWidth;
+            t = this.canvas.parentNode.offsetHeight;
+        } else {
+            e = window.innerWidth;
+            t = window.innerHeight;
+        }
+        this.size.width = e;
+        this.size.height = t;
+        this.size.ratio = e / t;
+        this.#x();
+        this.#b();
+        this.onAfterResize(this.size);
+    }
+    #x() {
+        this.camera.aspect = this.size.width / this.size.height;
+        if (this.camera.isPerspectiveCamera && this.cameraFov) {
+            if (this.cameraMinAspect && this.camera.aspect < this.cameraMinAspect) {
+                this.#A(this.cameraMinAspect);
+            } else if (this.cameraMaxAspect && this.camera.aspect > this.cameraMaxAspect) {
+                this.#A(this.cameraMaxAspect);
+            } else {
+                this.camera.fov = this.cameraFov;
+            }
+        }
+        this.camera.updateProjectionMatrix();
+        this.updateWorldSize();
+    }
+    #A(e) {
+        const t = Math.tan(o.degToRad(this.cameraFov / 2)) / (this.camera.aspect / e);
+        this.camera.fov = 2 * o.radToDeg(Math.atan(t));
+    }
+    updateWorldSize() {
+        if (this.camera.isPerspectiveCamera) {
+            const e = (this.camera.fov * Math.PI) / 180;
+            this.size.wHeight = 2 * Math.tan(e / 2) * this.camera.position.length();
+            this.size.wWidth = this.size.wHeight * this.camera.aspect;
+        } else if (this.camera.isOrthographicCamera) {
+            this.size.wHeight = this.camera.top - this.camera.bottom;
+            this.size.wWidth = this.camera.right - this.camera.left;
+        }
+    }
+    #b() {
+        this.renderer.setSize(this.size.width, this.size.height);
+        this.#t?.setSize(this.size.width, this.size.height);
+        let e = window.devicePixelRatio;
+        if (this.maxPixelRatio && e > this.maxPixelRatio) {
+            e = this.maxPixelRatio;
+        } else if (this.minPixelRatio && e < this.minPixelRatio) {
+            e = this.minPixelRatio;
+        }
+        this.renderer.setPixelRatio(e);
+        this.size.pixelRatio = e;
+    }
+    get postprocessing() {
+        return this.#t;
+    }
+    set postprocessing(e) {
+        this.#t = e;
+        this.render = e.render.bind(e);
+    }
+    #w() {
+        if (this.#n) return;
+        const animate = () => {
+            this.#l = requestAnimationFrame(animate);
+            this.#h.delta = this.#c.getDelta();
+            this.#h.elapsed += this.#h.delta;
+            this.onBeforeRender(this.#h);
+            this.render();
+            this.onAfterRender(this.#h);
+        };
+        this.#n = true;
+        this.#c.start();
+        animate();
+    }
+    #z() {
+        if (this.#n) {
+            cancelAnimationFrame(this.#l);
+            this.#n = false;
+            this.#c.stop();
+        }
+    }
+    #i() {
+        this.renderer.render(this.scene, this.camera);
+    }
+    clear() {
+        this.scene.traverse(e => {
+            if (e.isMesh && typeof e.material === 'object' && e.material !== null) {
+                Object.keys(e.material).forEach(t => {
+                    const i = e.material[t];
+                    if (i !== null && typeof i === 'object' && typeof i.dispose === 'function') {
+                        i.dispose();
+                    }
+                });
+                e.material.dispose();
+                e.geometry.dispose();
+            }
+        });
+        this.scene.clear();
+    }
+    dispose() {
+        this.#y();
+        this.#z();
+        this.clear();
+        this.#t?.dispose();
+        this.renderer.dispose();
+        this.isDisposed = true;
+    }
+}
+
+const b = new Map(),
+    A = new r();
+let R = false;
+function S(e) {
+    const t = {
+        position: new r(),
+        nPosition: new r(),
+        hover: false,
+        touching: false,
+        onEnter() { },
+        onMove() { },
+        onClick() { },
+        onLeave() { },
+        ...e
+    };
+    (function (e, t) {
+        if (!b.has(e)) {
+            b.set(e, t);
+            if (!R) {
+                document.body.addEventListener('pointermove', M);
+                document.body.addEventListener('pointerleave', L);
+                document.body.addEventListener('click', C);
+
+                document.body.addEventListener('touchstart', TouchStart, { passive: false });
+                document.body.addEventListener('touchmove', TouchMove, { passive: false });
+                document.body.addEventListener('touchend', TouchEnd, { passive: false });
+                document.body.addEventListener('touchcancel', TouchEnd, { passive: false });
+
+                R = true;
+            }
+        }
+    })(e.domElement, t);
+    t.dispose = () => {
+        const t = e.domElement;
+        b.delete(t);
+        if (b.size === 0) {
+            document.body.removeEventListener('pointermove', M);
+            document.body.removeEventListener('pointerleave', L);
+            document.body.removeEventListener('click', C);
+
+            document.body.removeEventListener('touchstart', TouchStart);
+            document.body.removeEventListener('touchmove', TouchMove);
+            document.body.removeEventListener('touchend', TouchEnd);
+            document.body.removeEventListener('touchcancel', TouchEnd);
+
+            R = false;
+        }
+    };
+    return t;
+}
+
+function M(e) {
+    A.x = e.clientX;
+    A.y = e.clientY;
+    processInteraction();
+}
+
+function processInteraction() {
+    for (const [elem, t] of b) {
+        const i = elem.getBoundingClientRect();
+        if (D(i)) {
+            P(t, i);
+            if (!t.hover) {
+                t.hover = true;
+                t.onEnter(t);
+            }
+            t.onMove(t);
+        } else if (t.hover && !t.touching) {
+            t.hover = false;
+            t.onLeave(t);
+        }
+    }
+}
+
+function C(e) {
+    A.x = e.clientX;
+    A.y = e.clientY;
+    for (const [elem, t] of b) {
+        const i = elem.getBoundingClientRect();
+        P(t, i);
+        if (D(i)) t.onClick(t);
+    }
+}
+
+function L() {
+    for (const t of b.values()) {
+        if (t.hover) {
+            t.hover = false;
+            t.onLeave(t);
+        }
+    }
+}
+
+function TouchStart(e) {
+    if (e.touches.length > 0) {
+        e.preventDefault();
+        A.x = e.touches[0].clientX;
+        A.y = e.touches[0].clientY;
+
+        for (const [elem, t] of b) {
+            const rect = elem.getBoundingClientRect();
+            if (D(rect)) {
+                t.touching = true;
+                P(t, rect);
+                if (!t.hover) {
+                    t.hover = true;
+                    t.onEnter(t);
+                }
+                t.onMove(t);
+            }
+        }
+    }
+}
+
+function TouchMove(e) {
+    if (e.touches.length > 0) {
+        e.preventDefault();
+        A.x = e.touches[0].clientX;
+        A.y = e.touches[0].clientY;
+
+        for (const [elem, t] of b) {
+            const rect = elem.getBoundingClientRect();
+            P(t, rect);
+
+            if (D(rect)) {
+                if (!t.hover) {
+                    t.hover = true;
+                    t.touching = true;
+                    t.onEnter(t);
+                }
+                t.onMove(t);
+            } else if (t.hover && t.touching) {
+                t.onMove(t);
+            }
+        }
+    }
+}
+
+function TouchEnd() {
+    for (const [, t] of b) {
+        if (t.touching) {
+            t.touching = false;
+            if (t.hover) {
+                t.hover = false;
+                t.onLeave(t);
+            }
+        }
+    }
+}
+
+function P(e, t) {
+    const { position: i, nPosition: s } = e;
+    i.x = A.x - t.left;
+    i.y = A.y - t.top;
+    s.x = (i.x / t.width) * 2 - 1;
+    s.y = (-i.y / t.height) * 2 + 1;
+}
+function D(e) {
+    const { x: t, y: i } = A;
+    const { left: s, top: n, width: o, height: r } = e;
+    return t >= s && t <= s + o && i >= n && i <= n + r;
+}
+
+const { randFloat: k, randFloatSpread: E } = o;
+const F = new a();
+const I = new a();
+const O = new a();
+const V = new a();
+const B = new a();
+const N = new a();
+const _ = new a();
+const j = new a();
+const H = new a();
+const T = new a();
+
+class W {
+    constructor(e) {
+        this.config = e;
+        this.positionData = new Float32Array(3 * e.count).fill(0);
+        this.velocityData = new Float32Array(3 * e.count).fill(0);
+        this.sizeData = new Float32Array(e.count).fill(1);
+        this.center = new a();
+        this.#R();
+        this.setSizes();
+    }
+    #R() {
+        const { config: e, positionData: t } = this;
+        this.center.toArray(t, 0);
+        for (let i = 1; i < e.count; i++) {
+            const s = 3 * i;
+            t[s] = E(2 * e.maxX);
+            t[s + 1] = E(2 * e.maxY);
+            t[s + 2] = E(2 * e.maxZ);
+        }
+    }
+    setSizes() {
+        const { config: e, sizeData: t } = this;
+        t[0] = e.size0;
+        for (let i = 1; i < e.count; i++) {
+            t[i] = k(e.minSize, e.maxSize);
+        }
+    }
+    update(e) {
+        const { config: t, center: i, positionData: s, sizeData: n, velocityData: o } = this;
+        let r = 0;
+        if (t.controlSphere0) {
+            r = 1;
+            F.fromArray(s, 0);
+            F.lerp(i, 0.1).toArray(s, 0);
+            V.set(0, 0, 0).toArray(o, 0);
+        }
+        for (let idx = r; idx < t.count; idx++) {
+            const base = 3 * idx;
+            I.fromArray(s, base);
+            B.fromArray(o, base);
+            B.y -= e.delta * t.gravity * n[idx];
+            B.multiplyScalar(t.friction);
+            B.clampLength(0, t.maxVelocity);
+            I.add(B);
+            I.toArray(s, base);
+            B.toArray(o, base);
+        }
+        for (let idx = r; idx < t.count; idx++) {
+            const base = 3 * idx;
+            I.fromArray(s, base);
+            B.fromArray(o, base);
+            const radius = n[idx];
+            for (let jdx = idx + 1; jdx < t.count; jdx++) {
+                const otherBase = 3 * jdx;
+                O.fromArray(s, otherBase);
+                N.fromArray(o, otherBase);
+                const otherRadius = n[jdx];
+                _.copy(O).sub(I);
+                const dist = _.length();
+                const sumRadius = radius + otherRadius;
+                if (dist < sumRadius) {
+                    const overlap = sumRadius - dist;
+                    j.copy(_)
+                        .normalize()
+                        .multiplyScalar(0.5 * overlap);
+                    H.copy(j).multiplyScalar(Math.max(B.length(), 1));
+                    T.copy(j).multiplyScalar(Math.max(N.length(), 1));
+                    I.sub(j);
+                    B.sub(H);
+                    I.toArray(s, base);
+                    B.toArray(o, base);
+                    O.add(j);
+                    N.add(T);
+                    O.toArray(s, otherBase);
+                    N.toArray(o, otherBase);
+                }
+            }
+            if (t.controlSphere0) {
+                _.copy(F).sub(I);
+                const dist = _.length();
+                const sumRadius0 = radius + n[0];
+                if (dist < sumRadius0) {
+                    const diff = sumRadius0 - dist;
+                    j.copy(_.normalize()).multiplyScalar(diff);
+                    H.copy(j).multiplyScalar(Math.max(B.length(), 2));
+                    I.sub(j);
+                    B.sub(H);
+                }
+            }
+            if (Math.abs(I.x) + radius > t.maxX) {
+                I.x = Math.sign(I.x) * (t.maxX - radius);
+                B.x = -B.x * t.wallBounce;
+            }
+            if (t.gravity === 0) {
+                if (Math.abs(I.y) + radius > t.maxY) {
+                    I.y = Math.sign(I.y) * (t.maxY - radius);
+                    B.y = -B.y * t.wallBounce;
+                }
+            } else if (I.y - radius < -t.maxY) {
+                I.y = -t.maxY + radius;
+                B.y = -B.y * t.wallBounce;
+            }
+            const maxBoundary = Math.max(t.maxZ, t.maxSize);
+            if (Math.abs(I.z) + radius > maxBoundary) {
+                I.z = Math.sign(I.z) * (t.maxZ - radius);
+                B.z = -B.z * t.wallBounce;
+            }
+            I.toArray(s, base);
+            B.toArray(o, base);
+        }
+    }
+}
+
+class Y extends c {
+    constructor(e) {
+        super(e);
+        this.uniforms = {
+            thicknessDistortion: { value: 0.1 },
+            thicknessAmbient: { value: 0 },
+            thicknessAttenuation: { value: 0.1 },
+            thicknessPower: { value: 2 },
+            thicknessScale: { value: 10 }
+        };
+        this.defines.USE_UV = '';
+        this.onBeforeCompile = e => {
+            Object.assign(e.uniforms, this.uniforms);
+            e.fragmentShader =
+                '\n        uniform float thicknessPower;\n        uniform float thicknessScale;\n        uniform float thicknessDistortion;\n        uniform float thicknessAmbient;\n        uniform float thicknessAttenuation;\n      ' +
+                e.fragmentShader;
+            e.fragmentShader = e.fragmentShader.replace(
+                'void main() {',
+                '\n        void RE_Direct_Scattering(const in IncidentLight directLight, const in vec2 uv, const in vec3 geometryPosition, const in vec3 geometryNormal, const in vec3 geometryViewDir, const in vec3 geometryClearcoatNormal, inout ReflectedLight reflectedLight) {\n          vec3 scatteringHalf = normalize(directLight.direction + (geometryNormal * thicknessDistortion));\n          float scatteringDot = pow(saturate(dot(geometryViewDir, -scatteringHalf)), thicknessPower) * thicknessScale;\n          #ifdef USE_COLOR\n            vec3 scatteringIllu = (scatteringDot + thicknessAmbient) * vColor;\n          #else\n            vec3 scatteringIllu = (scatteringDot + thicknessAmbient) * diffuse;\n          #endif\n          reflectedLight.directDiffuse += scatteringIllu * thicknessAttenuation * directLight.color;\n        }\n\n        void main() {\n      '
+            );
+            const t = h.lights_fragment_begin.replaceAll(
+                'RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );',
+                '\n          RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );\n          RE_Direct_Scattering(directLight, vUv, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, reflectedLight);\n        '
+            );
+            e.fragmentShader = e.fragmentShader.replace('#include <lights_fragment_begin>', t);
+            if (this.onBeforeCompile2) this.onBeforeCompile2(e);
+        };
+    }
+}
+
+const X = {
+    count: 200,
+    colors: [0, 0, 0],
+    ambientColor: 16777215,
+    ambientIntensity: 1,
+    lightIntensity: 200,
+    materialParams: {
+        metalness: 0.5,
+        roughness: 0.5,
+        clearcoat: 1,
+        clearcoatRoughness: 0.15
+    },
+    minSize: 0.5,
+    maxSize: 1,
+    size0: 1,
+    gravity: 0.5,
+    friction: 0.9975,
+    wallBounce: 0.95,
+    maxVelocity: 0.15,
+    maxX: 5,
+    maxY: 5,
+    maxZ: 2,
+    controlSphere0: false,
+    followCursor: true
+};
+
+const U = new m();
+
+class Z extends d {
+    constructor(e, t = {}) {
+        const i = { ...X, ...t };
+        const s = new z();
+        const n = new p(e, 0.04).fromScene(s).texture;
+        const o = new g();
+        const r = new Y({ envMap: n, ...i.materialParams });
+        r.envMapRotation.x = -Math.PI / 2;
+        super(o, r, i.count);
+        this.config = i;
+        this.physics = new W(i);
+        this.#S();
+        this.setColors(i.colors);
+    }
+    #S() {
+        this.ambientLight = new f(this.config.ambientColor, this.config.ambientIntensity);
+        this.add(this.ambientLight);
+        this.light = new u(this.config.colors[0], this.config.lightIntensity);
+        this.add(this.light);
+    }
+    setColors(e) {
+        if (Array.isArray(e) && e.length > 1) {
+            const t = (function (e) {
+                let t, i;
+                function setColors(e) {
+                    t = e;
+                    i = [];
+                    t.forEach(col => {
+                        i.push(new l(col));
+                    });
+                }
+                setColors(e);
+                return {
+                    setColors,
+                    getColorAt: function (ratio, out = new l()) {
+                        const scaled = Math.max(0, Math.min(1, ratio)) * (t.length - 1);
+                        const idx = Math.floor(scaled);
+                        const start = i[idx];
+                        if (idx >= t.length - 1) return start.clone();
+                        const alpha = scaled - idx;
+                        const end = i[idx + 1];
+                        out.r = start.r + alpha * (end.r - start.r);
+                        out.g = start.g + alpha * (end.g - start.g);
+                        out.b = start.b + alpha * (end.b - start.b);
+                        return out;
+                    }
+                };
+            })(e);
+            for (let idx = 0; idx < this.count; idx++) {
+                this.setColorAt(idx, t.getColorAt(idx / this.count));
+                if (idx === 0) {
+                    this.light.color.copy(t.getColorAt(idx / this.count));
+                }
+            }
+            this.instanceColor.needsUpdate = true;
+        }
+    }
+    update(e) {
+        this.physics.update(e);
+        for (let idx = 0; idx < this.count; idx++) {
+            U.position.fromArray(this.physics.positionData, 3 * idx);
+            if (idx === 0 && this.config.followCursor === false) {
+                U.scale.setScalar(0);
+            } else {
+                U.scale.setScalar(this.physics.sizeData[idx]);
+            }
+            U.updateMatrix();
+            this.setMatrixAt(idx, U.matrix);
+            if (idx === 0) this.light.position.copy(U.position);
+        }
+        this.instanceMatrix.needsUpdate = true;
+    }
+}
+
+function createBallpit(e, t = {}) {
+    const i = new x({
+        canvas: e,
+        size: 'parent',
+        rendererOptions: { antialias: true, alpha: true }
+    });
+    let s;
+    i.renderer.toneMapping = v;
+    i.camera.position.set(0, 0, 20);
+    i.camera.lookAt(0, 0, 0);
+    i.cameraMaxAspect = 1.5;
+    i.resize();
+    initialize(t);
+    const n = new y();
+    const o = new w(new a(0, 0, 1), 0);
+    const r = new a();
+    let c = false;
+
+    e.style.touchAction = 'none';
+    e.style.userSelect = 'none';
+    e.style.webkitUserSelect = 'none';
+
+    const h = S({
+        domElement: e,
+        onMove() {
+            n.setFromCamera(h.nPosition, i.camera);
+            i.camera.getWorldDirection(o.normal);
+            n.ray.intersectPlane(o, r);
+            s.physics.center.copy(r);
+            s.config.controlSphere0 = true;
+        },
+        onLeave() {
+            s.config.controlSphere0 = false;
+        }
+    });
+    function initialize(e) {
+        if (s) {
+            i.clear();
+            i.scene.remove(s);
+        }
+        s = new Z(i.renderer, e);
+        i.scene.add(s);
+    }
+    i.onBeforeRender = e => {
+        if (!c) s.update(e);
+    };
+    i.onAfterResize = e => {
+        s.config.maxX = e.wWidth / 2;
+        s.config.maxY = e.wHeight / 2;
+    };
+    return {
+        three: i,
+        get spheres() {
+            return s;
+        },
+        setCount(e) {
+            initialize({ ...s.config, count: e });
+        },
+        togglePause() {
+            c = !c;
+        },
+        dispose() {
+            h.dispose();
+            i.dispose();
+        }
+    };
+}
+
+const Ballpit = ({ className = '', followCursor = true, ...props }) => {
+    const canvasRef = useRef(null);
+    const spheresInstanceRef = useRef(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        spheresInstanceRef.current = createBallpit(canvas, { followCursor, ...props });
+
+        return () => {
+            if (spheresInstanceRef.current) {
+                spheresInstanceRef.current.dispose();
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return <canvas className={className} ref={canvasRef} style={{ width: '100%', height: '100%' }} />;
+};
+
+export default Ballpit;
 
 
 
@@ -2966,210 +3720,6 @@ export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude 
 
 
 
-==== FILE: .\frontend\src\components\Navigation.js ====
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import '../styles/Navigation.css';
-
-const Navigation = () => {
-    const { isAuthenticated, isAdmin, logout, user } = useAuth();
-    const { theme, toggleTheme } = useTheme();
-    const location = useLocation();
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-    const isActive = (path) => location.pathname === path;
-
-    const handleLogout = () => {
-        logout();
-        setMobileMenuOpen(false);
-    };
-
-    const closeMobileMenu = () => setMobileMenuOpen(false);
-
-    return (
-        <nav className="navigation">
-            <div className="nav-container">
-                {/* Logo */}
-                <Link to="/" className="nav-logo">
-                    <div className="logo-icon">📚</div>
-                    <span className="logo-text">Библиотека Пионеров</span>
-                </Link>
-
-                {/* Desktop Nav Links */}
-                <ul className="nav-links">
-                    <li>
-                        <Link
-                            to="/"
-                            className={`nav-link ${isActive('/') ? 'active' : ''}`}
-                        >
-                            Главная
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/books"
-                            className={`nav-link ${isActive('/books') ? 'active' : ''}`}
-                        >
-                            Книги
-                        </Link>
-                    </li>
-                    {isAuthenticated && (
-                        <>
-                            <li>
-                                <Link
-                                    to="/sections/methodclub"
-                                    className={`nav-link ${isActive('/sections') ? 'active' : ''}`}
-                                >
-                                    Разделы
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/favorites"
-                                    className={`nav-link ${isActive('/favorites') ? 'active' : ''}`}
-                                >
-                                    Избранное
-                                </Link>
-                            </li>
-                        </>
-                    )}
-                    {isAdmin && (
-                        <li>
-                            <Link
-                                to="/admin"
-                                className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
-                            >
-                                Админ
-                            </Link>
-                        </li>
-                    )}
-                </ul>
-
-
-                {/* Nav Actions */}
-                <div className="nav-actions">
-                    {/* Theme Toggle */}
-                    <button
-                        className="theme-toggle"
-                        onClick={toggleTheme}
-                        aria-label="Toggle theme"
-                    >
-                        {theme === 'light' ? (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                            </svg>
-                        ) : (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="5" />
-                                <line x1="12" y1="1" x2="12" y2="3" />
-                                <line x1="12" y1="21" x2="12" y2="23" />
-                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                                <line x1="1" y1="12" x2="3" y2="12" />
-                                <line x1="21" y1="12" x2="23" y2="12" />
-                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                            </svg>
-                        )}
-                    </button>
-
-                    {/* User Info or Login */}
-                    {isAuthenticated ? (
-                        <>
-                            <div className="user-info">
-                                <div className="user-avatar">
-                                    {user?.full_name?.charAt(0).toUpperCase() || 'U'}
-                                </div>
-                                <span className="user-name">{user?.full_name}</span>
-                            </div>
-                            <button className="btn-logout" onClick={handleLogout}>
-                                Выйти
-                            </button>
-                        </>
-                    ) : (
-                        <Link to="/auth" className="btn-login">
-                            Войти
-                        </Link>
-                    )}
-
-                    {/* Mobile Menu Toggle */}
-                    <button
-                        className={`mobile-menu-toggle ${mobileMenuOpen ? 'active' : ''}`}
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        aria-label="Toggle menu"
-                    >
-                        <span className="mobile-menu-bar"></span>
-                        <span className="mobile-menu-bar"></span>
-                        <span className="mobile-menu-bar"></span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Mobile Menu */}
-            <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`}>
-                <div className="mobile-menu-content">
-                    <Link
-                        to="/"
-                        className={`mobile-nav-link ${isActive('/') ? 'active' : ''}`}
-                        onClick={closeMobileMenu}
-                    >
-                        Главная
-                    </Link>
-                    <Link
-                        to="/books"
-                        className={`mobile-nav-link ${isActive('/books') ? 'active' : ''}`}
-                        onClick={closeMobileMenu}
-                    >
-                        Книги
-                    </Link>
-                    {isAuthenticated && (
-                        <Link
-                            to="/favorites"
-                            className={`mobile-nav-link ${isActive('/favorites') ? 'active' : ''}`}
-                            onClick={closeMobileMenu}
-                        >
-                            Избранное
-                        </Link>
-                    )}
-                    {isAdmin && (
-                        <Link
-                            to="/admin"
-                            className={`mobile-nav-link ${isActive('/admin') ? 'active' : ''}`}
-                            onClick={closeMobileMenu}
-                        >
-                            Админ
-                        </Link>
-                    )}
-
-                    <div className="mobile-divider"></div>
-
-                    <div className="mobile-actions">
-                        <button className="mobile-theme-toggle" onClick={toggleTheme}>
-                            {theme === 'light' ? '🌙 Темная тема' : '☀️ Светлая тема'}
-                        </button>
-
-                        {isAuthenticated ? (
-                            <button className="btn-logout" onClick={handleLogout} style={{ width: '100%' }}>
-                                Выйти
-                            </button>
-                        ) : (
-                            <Link to="/auth" className="btn-login" onClick={closeMobileMenu} style={{ width: '100%' }}>
-                                Войти
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </nav>
-    );
-};
-
-export default Navigation;
-
-
-
 ==== FILE: .\frontend\src\components\SearchFilters.js ====
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -3409,6 +3959,425 @@ const SearchFilters = ({ onFilterChange }) => {
 };
 
 export default SearchFilters;
+
+
+
+==== FILE: .\frontend\src\components\StaggeredMenu.js ====
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { gsap } from 'gsap';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import '../styles/StaggeredMenu.css';
+
+export const StaggeredMenu = ({
+    position = 'right',
+    colors = ['#667eea', '#764ba2'],
+    displayItemNumbering = true,
+    className,
+    logoText = '📚 Библиотека',
+    menuButtonColor = '#1d1d1f',
+    openMenuButtonColor = '#1d1d1f',
+    accentColor = '#00e965',
+    changeMenuColorOnOpen = false,
+    closeOnClickAway = true
+}) => {
+    const { isAuthenticated, isAdmin, logout, user } = useAuth();
+    const { theme, toggleTheme } = useTheme();
+    const location = useLocation();
+    const [open, setOpen] = useState(false);
+    const [expandedSection, setExpandedSection] = useState(null);
+    const openRef = useRef(false);
+    const panelRef = useRef(null);
+    const preLayersRef = useRef(null);
+    const preLayerElsRef = useRef([]);
+    const plusHRef = useRef(null);
+    const plusVRef = useRef(null);
+    const iconRef = useRef(null);
+    const textInnerRef = useRef(null);
+    const [textLines, setTextLines] = useState(['Меню', 'Закрыть']);
+    const toggleBtnRef = useRef(null);
+    const busyRef = useRef(false);
+
+    const openTlRef = useRef(null);
+    const closeTweenRef = useRef(null);
+    const spinTweenRef = useRef(null);
+    const textCycleAnimRef = useRef(null);
+    const colorTweenRef = useRef(null);
+
+    // Подразделы Методклуба
+    const sectionsItems = [
+        { label: 'Методклуб', link: '/sections/methodclub', icon: '📚' },
+        { label: 'Пионерская работа', link: '/sections/pioneers', icon: '⭐' },
+        { label: 'Школьный актив', link: '/sections/leaders', icon: '👥' },
+        { label: 'Волонтёры', link: '/sections/volunteers', icon: '🤝' },
+        { label: 'Школьные медиа', link: '/sections/media', icon: '📱' },
+        { label: 'Игры', link: '/sections/games', icon: '🎮' },
+        { label: 'Сценарии', link: '/sections/scenarios', icon: '🎭' },
+        { label: 'Пионерская книга', link: '/sections/book', icon: '📖' },
+        { label: 'Обмен опытом', link: '/sections/exchange', icon: '💬' },
+        { label: 'Контакты', link: '/sections/contacts', icon: '📞' },
+        { label: 'Календарь', link: '/sections/calendar', icon: '📅' },
+        { label: 'Документы', link: '/sections/documents', icon: '📄' }
+    ];
+
+    // Основные пункты меню
+    const menuItems = [
+        { label: 'Главная', link: '/', show: true },
+        { label: 'Книги', link: '/books', show: true },
+        {
+            label: 'Разделы',
+            link: '/sections/methodclub',
+            show: isAuthenticated,
+            hasSubmenu: true,
+            submenu: sectionsItems
+        },
+        { label: 'Избранное', link: '/favorites', show: isAuthenticated },
+        { label: 'Админ', link: '/admin', show: isAdmin }
+    ].filter(item => item.show);
+
+    useLayoutEffect(() => {
+        const ctx = gsap.context(() => {
+            const panel = panelRef.current;
+            const preContainer = preLayersRef.current;
+            const plusH = plusHRef.current;
+            const plusV = plusVRef.current;
+            const icon = iconRef.current;
+            const textInner = textInnerRef.current;
+            if (!panel || !plusH || !plusV || !icon || !textInner) return;
+
+            let preLayers = [];
+            if (preContainer) {
+                preLayers = Array.from(preContainer.querySelectorAll('.sm-prelayer'));
+            }
+            preLayerElsRef.current = preLayers;
+
+            const offscreen = position === 'left' ? -100 : 100;
+            gsap.set([panel, ...preLayers], { xPercent: offscreen });
+            gsap.set(plusH, { transformOrigin: '50% 50%', rotate: 0 });
+            gsap.set(plusV, { transformOrigin: '50% 50%', rotate: 90 });
+            gsap.set(icon, { rotate: 0, transformOrigin: '50% 50%' });
+            gsap.set(textInner, { yPercent: 0 });
+            if (toggleBtnRef.current) gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+        });
+        return () => ctx.revert();
+    }, [menuButtonColor, position]);
+
+    const buildOpenTimeline = useCallback(() => {
+        const panel = panelRef.current;
+        const layers = preLayerElsRef.current;
+        if (!panel) return null;
+
+        openTlRef.current?.kill();
+        closeTweenRef.current?.kill();
+
+        const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel'));
+        const numberEls = Array.from(panel.querySelectorAll('.sm-panel-list[data-numbering] .sm-panel-item'));
+
+        const layerStates = layers.map(el => ({ el, start: Number(gsap.getProperty(el, 'xPercent')) }));
+        const panelStart = Number(gsap.getProperty(panel, 'xPercent'));
+
+        if (itemEls.length) {
+            gsap.set(itemEls, { yPercent: 140, rotate: 10 });
+        }
+        if (numberEls.length) {
+            gsap.set(numberEls, { '--sm-num-opacity': 0 });
+        }
+
+        const tl = gsap.timeline({ paused: true });
+
+        layerStates.forEach((ls, i) => {
+            tl.fromTo(ls.el, { xPercent: ls.start }, { xPercent: 0, duration: 0.5, ease: 'power4.out' }, i * 0.07);
+        });
+
+        const lastTime = layerStates.length ? (layerStates.length - 1) * 0.07 : 0;
+        const panelInsertTime = lastTime + (layerStates.length ? 0.08 : 0);
+        const panelDuration = 0.65;
+        tl.fromTo(panel, { xPercent: panelStart }, { xPercent: 0, duration: panelDuration, ease: 'power4.out' }, panelInsertTime);
+
+        if (itemEls.length) {
+            const itemsStartRatio = 0.15;
+            const itemsStart = panelInsertTime + panelDuration * itemsStartRatio;
+            tl.to(itemEls, {
+                yPercent: 0,
+                rotate: 0,
+                duration: 1,
+                ease: 'power4.out',
+                stagger: { each: 0.1, from: 'start' }
+            }, itemsStart);
+
+            if (numberEls.length) {
+                tl.to(numberEls, {
+                    duration: 0.6,
+                    ease: 'power2.out',
+                    '--sm-num-opacity': 1,
+                    stagger: { each: 0.08, from: 'start' }
+                }, itemsStart + 0.1);
+            }
+        }
+
+        openTlRef.current = tl;
+        return tl;
+    }, []);
+
+    const playOpen = useCallback(() => {
+        if (busyRef.current) return;
+        busyRef.current = true;
+        const tl = buildOpenTimeline();
+        if (tl) {
+            tl.eventCallback('onComplete', () => {
+                busyRef.current = false;
+            });
+            tl.play(0);
+        } else {
+            busyRef.current = false;
+        }
+    }, [buildOpenTimeline]);
+
+    const playClose = useCallback(() => {
+        openTlRef.current?.kill();
+        const panel = panelRef.current;
+        const layers = preLayerElsRef.current;
+        if (!panel) return;
+
+        const all = [...layers, panel];
+        closeTweenRef.current?.kill();
+        const offscreen = position === 'left' ? -100 : 100;
+        closeTweenRef.current = gsap.to(all, {
+            xPercent: offscreen,
+            duration: 0.32,
+            ease: 'power3.in',
+            overwrite: 'auto',
+            onComplete: () => {
+                const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel'));
+                if (itemEls.length) gsap.set(itemEls, { yPercent: 140, rotate: 10 });
+                busyRef.current = false;
+            }
+        });
+    }, [position]);
+
+    const animateIcon = useCallback(opening => {
+        const icon = iconRef.current;
+        if (!icon) return;
+        spinTweenRef.current?.kill();
+        if (opening) {
+            spinTweenRef.current = gsap.to(icon, { rotate: 225, duration: 0.8, ease: 'power4.out', overwrite: 'auto' });
+        } else {
+            spinTweenRef.current = gsap.to(icon, { rotate: 0, duration: 0.35, ease: 'power3.inOut', overwrite: 'auto' });
+        }
+    }, []);
+
+    const animateColor = useCallback(opening => {
+        const btn = toggleBtnRef.current;
+        if (!btn) return;
+        colorTweenRef.current?.kill();
+        if (changeMenuColorOnOpen) {
+            const targetColor = opening ? openMenuButtonColor : menuButtonColor;
+            colorTweenRef.current = gsap.to(btn, {
+                color: targetColor,
+                delay: 0.18,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        }
+    }, [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen]);
+
+    const animateText = useCallback(opening => {
+        const inner = textInnerRef.current;
+        if (!inner) return;
+        textCycleAnimRef.current?.kill();
+
+        const currentLabel = opening ? 'Меню' : 'Закрыть';
+        const targetLabel = opening ? 'Закрыть' : 'Меню';
+        const cycles = 3;
+        const seq = [currentLabel];
+        let last = currentLabel;
+        for (let i = 0; i < cycles; i++) {
+            last = last === 'Меню' ? 'Закрыть' : 'Меню';
+            seq.push(last);
+        }
+        if (last !== targetLabel) seq.push(targetLabel);
+        seq.push(targetLabel);
+        setTextLines(seq);
+
+        gsap.set(inner, { yPercent: 0 });
+        const lineCount = seq.length;
+        const finalShift = ((lineCount - 1) / lineCount) * 100;
+        textCycleAnimRef.current = gsap.to(inner, {
+            yPercent: -finalShift,
+            duration: 0.5 + lineCount * 0.07,
+            ease: 'power4.out'
+        });
+    }, []);
+
+    const toggleMenu = useCallback(() => {
+        const target = !openRef.current;
+        openRef.current = target;
+        setOpen(target);
+        if (target) {
+            playOpen();
+        } else {
+            playClose();
+            setExpandedSection(null); // Закрываем все подменю
+        }
+        animateIcon(target);
+        animateColor(target);
+        animateText(target);
+    }, [playOpen, playClose, animateIcon, animateColor, animateText]);
+
+    const closeMenu = useCallback(() => {
+        if (openRef.current) {
+            openRef.current = false;
+            setOpen(false);
+            setExpandedSection(null);
+            playClose();
+            animateIcon(false);
+            animateColor(false);
+            animateText(false);
+        }
+    }, [playClose, animateIcon, animateColor, animateText]);
+
+    React.useEffect(() => {
+        if (!closeOnClickAway || !open) return;
+        const handleClickOutside = event => {
+            if (panelRef.current && !panelRef.current.contains(event.target) && !toggleBtnRef.current?.contains(event.target)) {
+                closeMenu();
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [closeOnClickAway, open, closeMenu]);
+
+    const handleLogout = () => {
+        logout();
+        closeMenu();
+    };
+
+    const toggleSubmenu = (index) => {
+        setExpandedSection(expandedSection === index ? null : index);
+    };
+
+    return (
+        <div
+            className={(className ? className + ' ' : '') + 'staggered-menu-wrapper fixed-wrapper'}
+            style={{ '--sm-accent': accentColor }}
+            data-position={position}
+            data-open={open || undefined}
+        >
+            <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
+                {colors.slice(0, 2).map((c, i) => (
+                    <div key={i} className="sm-prelayer" style={{ background: c }} />
+                ))}
+            </div>
+
+            <header className="staggered-menu-header" aria-label="Main navigation header">
+                <Link to="/" className="sm-logo" aria-label="Logo">
+                    <span className="sm-logo-text">{logoText}</span>
+                </Link>
+                <button
+                    ref={toggleBtnRef}
+                    className="sm-toggle"
+                    aria-label={open ? 'Закрыть меню' : 'Открыть меню'}
+                    aria-expanded={open}
+                    onClick={toggleMenu}
+                    type="button"
+                >
+                    <span className="sm-toggle-textWrap" aria-hidden="true">
+                        <span ref={textInnerRef} className="sm-toggle-textInner">
+                            {textLines.map((l, i) => (
+                                <span className="sm-toggle-line" key={i}>{l}</span>
+                            ))}
+                        </span>
+                    </span>
+                    <span ref={iconRef} className="sm-icon" aria-hidden="true">
+                        <span ref={plusHRef} className="sm-icon-line" />
+                        <span ref={plusVRef} className="sm-icon-line sm-icon-line-v" />
+                    </span>
+                </button>
+            </header>
+
+            <aside ref={panelRef} className="staggered-menu-panel" aria-hidden={!open}>
+                <div className="sm-panel-inner">
+                    {/* Пункты меню */}
+                    <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
+                        {menuItems.map((item, idx) => (
+                            <li className="sm-panel-itemWrap" key={item.label + idx}>
+                                {item.hasSubmenu ? (
+                                    <div className="sm-submenu-wrapper">
+                                        <button
+                                            className={`sm-panel-item submenu-toggle ${expandedSection === idx ? 'expanded' : ''}`}
+                                            data-index={idx + 1}
+                                            onClick={() => toggleSubmenu(idx)}
+                                        >
+                                            <span className="sm-panel-itemLabel">{item.label}</span>
+                                            <span className="sm-submenu-arrow">
+                                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                    <path d="M7 8l3 3 3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            </span>
+                                        </button>
+                                        <ul className={`sm-submenu ${expandedSection === idx ? 'expanded' : ''}`}>
+                                            {item.submenu.map((subItem, subIdx) => (
+                                                <li key={subIdx} className="sm-submenu-item">
+                                                    <Link
+                                                        to={subItem.link}
+                                                        className={`sm-submenu-link ${location.pathname === subItem.link ? 'active' : ''}`}
+                                                        onClick={closeMenu}
+                                                    >
+                                                        <span className="sm-submenu-icon">{subItem.icon}</span>
+                                                        <span className="sm-submenu-label">{subItem.label}</span>
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        className={`sm-panel-item ${location.pathname === item.link || location.pathname.startsWith(item.link + '/') ? 'active' : ''}`}
+                                        to={item.link}
+                                        data-index={idx + 1}
+                                        onClick={closeMenu}
+                                    >
+                                        <span className="sm-panel-itemLabel">{item.label}</span>
+                                    </Link>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+
+                    {/* Информация о пользователе и действия */}
+                    <div className="sm-user-section">
+                        {isAuthenticated && user && (
+                            <div className="sm-user-info">
+                                <div className="sm-user-avatar">{user.fullname?.charAt(0).toUpperCase() || 'U'}</div>
+                                <span className="sm-user-name">{user.fullname || 'Пользователь'}</span>
+                            </div>
+                        )}
+
+                        <div className="sm-actions">
+                            <button className="sm-theme-btn" onClick={toggleTheme} aria-label="Переключить тему">
+                                <span className="sm-theme-icon">{theme === 'light' ? '🌙' : '☀️'}</span>
+                                <span className="sm-theme-text">{theme === 'light' ? 'Темная тема' : 'Светлая тема'}</span>
+                            </button>
+
+                            {isAuthenticated ? (
+                                <button className="sm-auth-btn logout" onClick={handleLogout}>
+                                    Выйти
+                                </button>
+                            ) : (
+                                <Link to="/auth" className="sm-auth-btn login" onClick={closeMenu}>
+                                    Войти
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    );
+};
+
+export default StaggeredMenu;
 
 
 
@@ -4658,6 +5627,7 @@ export default FavoritesPage;
 ==== FILE: .\frontend\src\pages\LandingPage.js ====
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import Ballpit from '../components/Ballpit';
 import '../styles/LandingPage.css';
 
 const LandingPage = () => {
@@ -4687,7 +5657,6 @@ const LandingPage = () => {
 
         const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-        // Наблюдаем только за заголовками и карточками
         if (sectionTitleRef.current) observer.observe(sectionTitleRef.current);
         if (sectionSubtitleRef.current) observer.observe(sectionSubtitleRef.current);
 
@@ -4695,7 +5664,6 @@ const LandingPage = () => {
             if (card) observer.observe(card);
         });
 
-        // НЕ наблюдаем за FAQ - они всегда видимы
         return () => observer.disconnect();
     }, []);
 
@@ -4756,9 +5724,29 @@ const LandingPage = () => {
     return (
         <div className="landing-page">
             <section className="hero-section">
+                {/* Ballpit фон */}
+                <div className="hero-ballpit-container">
+                    <Ballpit
+                        count={200}
+                        colors={[0x00e965, 0x667eea, 0x764ba2]}
+                        gravity={0.01}
+                        friction={0.9975}
+                        wallBounce={0.95}
+                        followCursor={false}
+                        minSize={0.4}
+                        maxSize={1.0}
+                        materialParams={{
+                            metalness: 0.5,
+                            roughness: 0.5,
+                            clearcoat: 1,
+                            clearcoatRoughness: 0.15
+                        }}
+                    />
+                </div>
+
+                {/* Контент поверх Ballpit */}
                 <div className="hero-content">
                     <h1 className="hero-title">Онлайн-библиотека Пионеров Башкортостана</h1>
-                    <p className="hero-subtitle"></p>
                     <p className="hero-description">
                         Читайте, сохраняйте и делитесь впечатлениями о любимых произведениях
                     </p>
@@ -5026,68 +6014,6 @@ export default PrivacyPage;
 
 
 
-==== FILE: .\frontend\src\pages\SectionsPage.js ====
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import '../styles/SectionsPage.css';
-
-
-const SectionsPage = ({ children }) => {
-    const location = useLocation();
-
-
-    const sections = [
-        { id: 'methodclub', name: 'Методический клуб', path: '/sections/methodclub' },
-        { id: 'pioneers', name: 'Работа с пионерами', path: '/sections/pioneers' },
-        { id: 'leaders', name: 'Школа отрядных вожатых', path: '/sections/leaders' },
-        { id: 'volunteers', name: 'Волонтерский отряд', path: '/sections/volunteers' },
-        { id: 'media', name: 'Школьный медиа-центр', path: '/sections/media' },
-        { id: 'games', name: 'Игры и упражнения', path: '/sections/games' },
-        { id: 'scenarios', name: 'Сценарии мероприятий', path: '/sections/scenarios' },
-        { id: 'book', name: 'Пионерская организация - как это делается', path: '/sections/book' },
-        { id: 'exchange', name: 'Обмен опытом', path: '/sections/exchange' }, // ✅ ДОБАВЛЕНО
-        { id: 'contacts', name: 'Контакты', path: '/sections/contacts' }, // ✅ ДОБАВЛЕНО
-        { id: 'calendar', name: 'Календарь воспитания', path: '/sections/calendar' }, // ✅ ДОБАВЛЕНО
-        { id: 'documents', name: 'Документы и нормативно-правовая база', path: '/sections/documents' }, // ✅ ДОБАВЛЕНО
-    ];
-
-
-
-
-    const isActive = (path) => location.pathname === path;
-
-
-    return (
-        <div className="sections-page">
-            <div className="sections-container">
-                <nav className="sections-nav">
-                    <div className="sections-tabs">
-                        {sections.map((section) => (
-                            <Link
-                                key={section.id}
-                                to={section.path}
-                                className={`section-tab ${isActive(section.path) ? 'active' : ''}`}
-                            >
-                                {section.name}
-                            </Link>
-                        ))}
-                    </div>
-                </nav>
-
-
-                <div className="section-content">
-                    {children}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-
-export default SectionsPage;
-
-
-
 ==== FILE: .\frontend\src\pages\sections\CalendarPage.js ====
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
@@ -5099,10 +6025,10 @@ const CalendarPage = () => {
             {/* Hero Section */}
             <div className="calendar-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5163,10 +6089,10 @@ const ContactsPage = () => {
             {/* Hero Section */}
             <div className="contacts-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5222,10 +6148,10 @@ const DocumentsPage = () => {
             {/* Hero Section */}
             <div className="documents-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5296,10 +6222,10 @@ const ExchangePage = () => {
             {/* Hero Section */}
             <div className="exchange-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5412,10 +6338,10 @@ const GamesPage = () => {
             {/* Hero Section */}
             <div className="games-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5505,10 +6431,10 @@ const MethodClubPage = () => {
             {/* Hero Section */}
             <div className="method-club-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]} // Фиолетовый оттенок
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5590,10 +6516,10 @@ const PioneerBookPage = () => {
             {/* Hero Section */}
             <div className="pioneer-book-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5728,10 +6654,10 @@ const PioneersWorkPage = () => {
             {/* Hero Section */}
             <div className="pioneers-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5827,10 +6753,10 @@ const ScenariosPage = () => {
             {/* Hero Section */}
             <div className="scenarios-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5889,10 +6815,10 @@ const SchoolLeadersPage = () => {
             {/* Hero Section */}
             <div className="school-leaders-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -5953,10 +6879,10 @@ const SchoolMediaPage = () => {
             {/* Hero Section */}
             <div className="school-media-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -6022,10 +6948,10 @@ const VolunteersPage = () => {
             {/* Hero Section */}
             <div className="volunteers-hero">
                 <Iridescence
-                    color={[0.4, 0.49, 0.92]}
+                    color={[0.5, 0.6, 0.8]}
                     mouseReact={false}
                     amplitude={0.1}
-                    speed={0.5}
+                    speed={1}
                 />
 
                 <div className="hero-content-wrapper">
@@ -10817,7 +11743,7 @@ export default api;
 ==== FILE: .\frontend\src\styles\LandingPage.css ====
 /* ============================================
    APPLE PRO STYLE - PERFECT EDITION 2025
-   Clean & Consistent Design
+   Clean & Consistent Design with Ballpit
 ============================================ */
 
 :root {
@@ -10932,10 +11858,14 @@ html {
     transition: background-color 0.3s ease;
 }
 
-/* Hero Section */
+/* ============================================
+   Hero Section with Ballpit
+============================================ */
+
 .hero-section {
     position: relative;
     height: 100vh;
+    min-height: 700px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10952,15 +11882,40 @@ html {
     height: 20%;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
     pointer-events: none;
+    z-index: 2;
 }
 
+/* Ballpit Container - фоновый слой */
+.hero-ballpit-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-ballpit-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Hero Content - поверх Ballpit */
 .hero-content {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     text-align: center;
     padding: 0 var(--spacing-md);
     max-width: 980px;
     margin: 0 auto;
+    pointer-events: none;
+    /* Позволяет взаимодействовать с Ballpit */
+}
+
+/* Все интерактивные элементы внутри hero-content */
+.hero-content * {
+    pointer-events: auto;
 }
 
 .hero-title {
@@ -10973,7 +11928,7 @@ html {
     margin-bottom: var(--spacing-sm);
     opacity: 0;
     animation: fadeInUp 1s 0.2s var(--transition-smooth) forwards;
-    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .hero-subtitle {
@@ -10985,22 +11940,23 @@ html {
     margin-bottom: var(--spacing-lg);
     opacity: 0;
     animation: fadeInUp 1s 0.4s var(--transition-smooth) forwards;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
 }
 
 .hero-description {
-    font-size: 19px;
+    font-size: clamp(18px, 2.5vw, 21px);
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.9);
     margin-bottom: var(--spacing-xl);
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
     opacity: 0;
     animation: fadeInUp 1s 0.6s var(--transition-smooth) forwards;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Кнопки - АБСОЛЮТНО ОДИНАКОВЫЕ */
+/* Hero Actions - Кнопки */
 .hero-actions {
     display: flex;
     gap: var(--spacing-sm);
@@ -11010,7 +11966,7 @@ html {
     animation: fadeInUp 1s 0.8s var(--transition-smooth) forwards;
 }
 
-/* ОДИН ОБЩИЙ КЛАСС для обеих кнопок */
+/* Одинаковые стили для обеих кнопок */
 .btn-primary,
 .btn-secondary {
     display: inline-flex;
@@ -11034,7 +11990,7 @@ html {
     transition: all 0.4s var(--transition-smooth);
 }
 
-/* Shine эффект - одинаковый */
+/* Shine эффект */
 .btn-primary::before,
 .btn-secondary::before {
     content: '';
@@ -11049,7 +12005,6 @@ html {
     z-index: 0;
 }
 
-/* Hover - одинаковый */
 .btn-primary:hover::before,
 .btn-secondary:hover::before {
     left: 100%;
@@ -11063,20 +12018,21 @@ html {
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 }
 
-/* Active - одинаковый */
 .btn-primary:active,
 .btn-secondary:active {
     transform: translateY(0) scale(0.98);
 }
 
-/* Текст */
 .btn-primary>span,
 .btn-secondary>span {
     position: relative;
     z-index: 1;
 }
 
-/* Features Section */
+/* ============================================
+   Features Section
+============================================ */
+
 .features-section {
     padding: var(--spacing-3xl) var(--spacing-md);
     max-width: 1400px;
@@ -11269,7 +12225,10 @@ html {
     gap: 10px;
 }
 
-/* FAQ Section */
+/* ============================================
+   FAQ Section
+============================================ */
+
 .faq-section {
     padding: var(--spacing-2xl) var(--spacing-md);
     max-width: 980px;
@@ -11282,7 +12241,6 @@ html {
     gap: var(--spacing-sm);
 }
 
-/* ИСПРАВЛЕНО: FAQ больше не исчезают */
 .faq-accordion {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -11291,7 +12249,6 @@ html {
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
-    /* ВАЖНО: НЕТ opacity и transform - элемент всегда видим */
     transition: box-shadow 0.3s var(--transition-smooth),
         background 0.3s ease,
         border-color 0.3s ease;
@@ -11341,7 +12298,6 @@ html {
     color: #667eea;
 }
 
-/* ИСПРАВЛЕНО: простая анимация без конфликтов */
 .faq-accordion-body {
     max-height: 0;
     overflow: hidden;
@@ -11360,7 +12316,10 @@ html {
     transition: color 0.3s ease;
 }
 
-/* Анимации */
+/* ============================================
+   Animations
+============================================ */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -11373,7 +12332,10 @@ html {
     }
 }
 
-/* Responsive */
+/* ============================================
+   Responsive Design
+============================================ */
+
 @media (max-width: 1024px) {
     .features-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -11382,9 +12344,17 @@ html {
 
 @media (max-width: 768px) {
     .hero-section {
-        height: auto;
-        min-height: 100vh;
-        padding: var(--spacing-3xl) var(--spacing-md);
+        min-height: 600px;
+    }
+
+    .hero-title {
+        font-size: clamp(36px, 10vw, 56px);
+        margin-bottom: 16px;
+    }
+
+    .hero-description {
+        font-size: clamp(16px, 4vw, 18px);
+        margin-bottom: 32px;
     }
 
     .features-grid {
@@ -11394,6 +12364,8 @@ html {
     .hero-actions {
         flex-direction: column;
         width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
     }
 
     .btn-primary,
@@ -11407,7 +12379,10 @@ html {
     }
 }
 
-/* Accessibility */
+/* ============================================
+   Accessibility
+============================================ */
+
 @media (prefers-reduced-motion: reduce) {
 
     *,
@@ -11424,6 +12399,12 @@ html {
 .btn-secondary:focus-visible {
     outline: 3px solid rgba(255, 255, 255, 0.5);
     outline-offset: 4px;
+}
+
+.feature-card:focus-visible,
+.faq-accordion-header:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
 }
 
 
@@ -11895,663 +12876,6 @@ html {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-}
-
-
-==== FILE: .\frontend\src\styles\Navigation.css ====
-﻿/* ============================================
-   APPLE PRO NAVIGATION - ULTIMATE EDITION 2025
-   Perfect Layout & Premium Design
-============================================ */
-
-:root {
-  /* Apple Color System */
-  --nav-primary: #667eea;
-  --nav-text: #1d1d1f;
-  --nav-text-secondary: #86868b;
-  --nav-bg: rgba(255, 255, 255, 0.8);
-  --nav-border: rgba(0, 0, 0, 0.08);
-  --nav-hover: rgba(0, 0, 0, 0.05);
-  --nav-active: rgba(102, 126, 234, 0.1);
-  --nav-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --nav-height: 64px;
-
-  /* Button Styles - как на лендинге */
-  --btn-bg: rgba(255, 255, 255, 0.15);
-  --btn-border: rgba(255, 255, 255, 0.3);
-  --btn-radius: 12px;
-
-  /* Typography */
-  --nav-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-
-  /* Transitions */
-  --nav-transition: cubic-bezier(0.28, 0.11, 0.32, 1);
-  --nav-speed: 0.3s;
-}
-
-/* Dark Mode */
-[data-theme='dark'],
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --nav-text: #f5f5f7;
-    --nav-text-secondary: #a1a1a6;
-    --nav-bg: rgba(29, 29, 31, 0.8);
-    --nav-border: rgba(255, 255, 255, 0.1);
-    --nav-hover: rgba(255, 255, 255, 0.05);
-    --nav-active: rgba(102, 126, 234, 0.15);
-    --nav-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  }
-}
-
-[data-theme='dark'] {
-  --nav-text: #f5f5f7;
-  --nav-text-secondary: #a1a1a6;
-  --nav-bg: rgba(29, 29, 31, 0.8);
-  --nav-border: rgba(255, 255, 255, 0.1);
-  --nav-hover: rgba(255, 255, 255, 0.05);
-  --nav-active: rgba(102, 126, 234, 0.15);
-  --nav-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-/* Navigation Container */
-.navigation {
-  width: 100%;
-  background: var(--nav-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--nav-border);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  transition: background var(--nav-speed) ease, border-color var(--nav-speed) ease;
-  box-shadow: var(--nav-shadow);
-  animation: navSlideDown 0.6s var(--nav-transition) backwards;
-}
-
-/* Nav Container - 3 колонки Grid */
-.nav-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 24px;
-  height: var(--nav-height);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 24px;
-}
-
-/* Logo - в самый левый край */
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  transition: opacity var(--nav-speed) var(--nav-transition);
-  cursor: pointer;
-  opacity: 0;
-  animation: fadeInLeft 0.6s 0.1s var(--nav-transition) forwards;
-}
-
-.nav-logo:hover {
-  opacity: 0.75;
-}
-
-.logo-icon {
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 10px;
-  color: white;
-  font-weight: 700;
-  font-size: 18px;
-  transition: transform var(--nav-speed) var(--nav-transition);
-}
-
-.nav-logo:hover .logo-icon {
-  transform: scale(1.05);
-}
-
-.logo-text {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--nav-text);
-  font-family: var(--nav-font);
-  letter-spacing: -0.02em;
-}
-
-/* Nav Links - всегда по центру */
-.nav-links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  opacity: 0;
-  animation: fadeInUp 0.6s 0.2s var(--nav-transition) forwards;
-}
-
-.nav-link {
-  color: var(--nav-text-secondary);
-  font-size: 15px;
-  font-weight: 500;
-  padding: 10px 18px;
-  border-radius: var(--btn-radius);
-  text-decoration: none;
-  transition: all var(--nav-speed) var(--nav-transition);
-  font-family: var(--nav-font);
-  position: relative;
-}
-
-.nav-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--nav-hover);
-  border-radius: var(--btn-radius);
-  opacity: 0;
-  transition: opacity var(--nav-speed) var(--nav-transition);
-}
-
-.nav-link:hover {
-  color: var(--nav-text);
-}
-
-.nav-link:hover::before {
-  opacity: 1;
-}
-
-.nav-link.active {
-  color: var(--nav-text);
-  background: var(--nav-active);
-  font-weight: 600;
-}
-
-/* Nav Actions - в самый правый край */
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-self: end;
-  opacity: 0;
-  animation: fadeInRight 0.6s 0.3s var(--nav-transition) forwards;
-}
-
-/* Все кнопки в ЕДИНОМ стиле - как на лендинге */
-.theme-toggle,
-.btn-login,
-.btn-logout {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 42px;
-  padding: 0 20px;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: var(--nav-font);
-  border-radius: var(--btn-radius);
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all var(--nav-speed) var(--nav-transition);
-  position: relative;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* Theme Toggle - в том же стиле */
-.theme-toggle {
-  width: 42px;
-  padding: 0;
-  background: var(--nav-hover);
-  color: var(--nav-text-secondary);
-  border: 1px solid var(--nav-border);
-}
-
-.theme-toggle::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--nav-active);
-  opacity: 0;
-  transition: opacity var(--nav-speed) var(--nav-transition);
-}
-
-.theme-toggle:hover {
-  color: var(--nav-text);
-  border-color: rgba(102, 126, 234, 0.3);
-}
-
-.theme-toggle:hover::before {
-  opacity: 1;
-}
-
-.theme-toggle svg {
-  position: relative;
-  z-index: 1;
-  transition: transform var(--nav-speed) var(--nav-transition);
-}
-
-.theme-toggle:hover svg {
-  transform: scale(1.1);
-}
-
-/* Login Button - градиент как на лендинге */
-.btn-login {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  border: none;
-}
-
-.btn-login::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s var(--nav-transition);
-}
-
-.btn-login:hover::before {
-  left: 100%;
-}
-
-.btn-login:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-}
-
-.btn-login:active {
-  transform: translateY(0);
-}
-
-/* Logout Button - такой же стиль */
-.btn-logout {
-  background: var(--nav-hover);
-  color: var(--nav-text);
-  border: 1px solid var(--nav-border);
-}
-
-.btn-logout::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--nav-active);
-  opacity: 0;
-  transition: opacity var(--nav-speed) var(--nav-transition);
-}
-
-.btn-logout:hover {
-  border-color: rgba(102, 126, 234, 0.3);
-  transform: translateY(-1px);
-}
-
-.btn-logout:hover::before {
-  opacity: 1;
-}
-
-.btn-logout:active {
-  transform: translateY(0);
-}
-
-/* User Info */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 14px 6px 6px;
-  background: var(--nav-hover);
-  border: 1px solid var(--nav-border);
-  border-radius: var(--btn-radius);
-  cursor: pointer;
-  transition: all var(--nav-speed) var(--nav-transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.user-info::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--nav-active);
-  opacity: 0;
-  transition: opacity var(--nav-speed) var(--nav-transition);
-}
-
-.user-info:hover {
-  border-color: rgba(102, 126, 234, 0.3);
-  transform: translateY(-1px);
-}
-
-.user-info:hover::before {
-  opacity: 1;
-}
-
-.user-info>* {
-  position: relative;
-  z-index: 1;
-}
-
-.user-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  overflow: hidden;
-}
-
-.user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-name {
-  color: var(--nav-text);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: var(--nav-font);
-}
-
-/* Mobile Menu Toggle */
-.mobile-menu-toggle {
-  display: none;
-  width: 42px;
-  height: 42px;
-  background: var(--nav-hover);
-  border: 1px solid var(--nav-border);
-  border-radius: var(--btn-radius);
-  cursor: pointer;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  transition: all var(--nav-speed) var(--nav-transition);
-}
-
-.mobile-menu-toggle:hover {
-  background: var(--nav-active);
-  border-color: rgba(102, 126, 234, 0.3);
-}
-
-.mobile-menu-bar {
-  width: 18px;
-  height: 2px;
-  background: var(--nav-text);
-  border-radius: 2px;
-  transition: all var(--nav-speed) var(--nav-transition);
-}
-
-.mobile-menu-toggle.active .mobile-menu-bar:nth-child(1) {
-  transform: rotate(45deg) translateY(7px);
-}
-
-.mobile-menu-toggle.active .mobile-menu-bar:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-toggle.active .mobile-menu-bar:nth-child(3) {
-  transform: rotate(-45deg) translateY(-7px);
-}
-
-/* Mobile Menu Overlay */
-.mobile-menu-overlay {
-  position: fixed;
-  top: var(--nav-height);
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--nav-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity var(--nav-speed) ease, visibility var(--nav-speed) ease;
-  z-index: 999;
-  overflow-y: auto;
-}
-
-.mobile-menu-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.mobile-menu-content {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  animation: fadeInUp 0.4s var(--nav-transition);
-}
-
-.mobile-nav-link {
-  display: flex;
-  align-items: center;
-  padding: 14px 18px;
-  color: var(--nav-text-secondary);
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 500;
-  font-family: var(--nav-font);
-  border-radius: var(--btn-radius);
-  transition: all var(--nav-speed) var(--nav-transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.mobile-nav-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--nav-hover);
-  opacity: 0;
-  transition: opacity var(--nav-speed) var(--nav-transition);
-}
-
-.mobile-nav-link:hover {
-  color: var(--nav-text);
-}
-
-.mobile-nav-link:hover::before {
-  opacity: 1;
-}
-
-.mobile-nav-link.active {
-  color: var(--nav-text);
-  background: var(--nav-active);
-  font-weight: 600;
-}
-
-.mobile-divider {
-  height: 1px;
-  background: var(--nav-border);
-  margin: 12px 0;
-}
-
-.mobile-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 12px;
-}
-
-.mobile-theme-toggle {
-  width: 100%;
-  height: 46px;
-  padding: 0 18px;
-  background: var(--nav-hover);
-  border: 1px solid var(--nav-border);
-  border-radius: var(--btn-radius);
-  color: var(--nav-text);
-  font-size: 15px;
-  font-weight: 600;
-  font-family: var(--nav-font);
-  cursor: pointer;
-  transition: all var(--nav-speed) var(--nav-transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: relative;
-  overflow: hidden;
-}
-
-.mobile-theme-toggle::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--nav-active);
-  opacity: 0;
-  transition: opacity var(--nav-speed) var(--nav-transition);
-}
-
-.mobile-theme-toggle:hover {
-  border-color: rgba(102, 126, 234, 0.3);
-}
-
-.mobile-theme-toggle:hover::before {
-  opacity: 1;
-}
-
-/* Анимации появления */
-@keyframes navSlideDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .nav-container {
-    padding: 0 16px;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-  }
-
-  .nav-links {
-    display: none;
-  }
-
-  .mobile-menu-toggle {
-    display: flex;
-  }
-
-  .user-name {
-    display: none;
-  }
-
-  .theme-toggle {
-    width: 40px;
-    height: 40px;
-  }
-
-  .btn-login,
-  .btn-logout {
-    height: 40px;
-    padding: 0 18px;
-    font-size: 14px;
-  }
-
-  .user-info {
-    padding: 5px;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-container {
-    padding: 0 12px;
-  }
-
-  .logo-text {
-    font-size: 18px;
-  }
-
-  .logo-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 16px;
-  }
-
-  .nav-actions {
-    gap: 8px;
-  }
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Focus States */
-.nav-link:focus-visible,
-.btn-login:focus-visible,
-.btn-logout:focus-visible,
-.theme-toggle:focus-visible,
-.mobile-theme-toggle:focus-visible {
-  outline: 2px solid var(--nav-primary);
-  outline-offset: 2px;
 }
 
 
@@ -14960,148 +15284,616 @@ html {
 }
 
 
-==== FILE: .\frontend\src\styles\SectionsPage.css ====
-/* ==================== SECTIONS PAGE ==================== */
-.sections-page {
+==== FILE: .\frontend\src\styles\StaggeredMenu.css ====
+/* ============================================
+   STAGGERED MENU - Актуализированная версия
+============================================ */
+
+:root {
+    --sm-accent: #00e965;
+}
+
+.staggered-menu-wrapper {
+    position: relative;
     width: 100%;
-    min-height: 100vh;
-    position: relative;
-    background: transparent;
+    height: 100%;
+    z-index: 1000;
 }
 
-.sections-container {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 0;
-    position: relative;
-    z-index: 1;
-    background: var(--bg-primary);
+.staggered-menu-wrapper.fixed-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1000;
 }
 
-/* ==================== SECTIONS NAV ==================== */
-.sections-nav {
-    background: var(--nav-bg);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid var(--nav-border);
-    position: sticky;
-    top: var(--nav-height);
-    z-index: 999;
-    transition: background var(--nav-speed) ease, border-color var(--nav-speed) ease;
-    box-shadow: var(--nav-shadow);
-    padding: 12px 0;
-    /* ✅ ДОБАВЛЕНО для вертикального отступа */
+.staggered-menu-wrapper.fixed-wrapper>* {
+    pointer-events: auto;
 }
 
-.sections-tabs {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: flex;
-    flex-wrap: wrap;
-    /* ✅ ИЗМЕНЕНО - перенос на новую строку */
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    /* ✅ ИЗМЕНЕНО с 6px */
-    list-style: none;
-    min-height: var(--nav-height);
-}
+/* ============================================
+   Header & Logo
+============================================ */
 
-.section-tab {
-    color: var(--nav-text-secondary);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 10px 18px;
-    border-radius: var(--btn-radius);
-    text-decoration: none;
-    transition: all var(--nav-speed) var(--nav-transition);
-    font-family: var(--nav-font);
-    position: relative;
-    white-space: nowrap;
-}
-
-.section-tab::before {
-    content: '';
+.staggered-menu-header {
     position: absolute;
-    inset: 0;
-    background: var(--nav-hover);
-    border-radius: var(--btn-radius);
-    opacity: 0;
-    transition: opacity var(--nav-speed) var(--nav-transition);
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    background: transparent;
+    pointer-events: none;
+    z-index: 1001;
 }
 
-.section-tab:hover {
-    color: var(--nav-text);
+.staggered-menu-header>* {
+    pointer-events: auto;
 }
 
-.section-tab:hover::before {
-    opacity: 1;
+.sm-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--apple-text-primary, #1d1d1f);
+    transition: opacity 0.3s ease, color 0.3s ease;
 }
 
-.section-tab.active {
-    color: var(--nav-text);
-    background: var(--nav-active);
-    font-weight: 600;
+[data-theme='dark'] .sm-logo {
+    color: #f5f5f7;
 }
 
-.section-content {
-    animation: fadeIn 0.4s ease;
+.sm-logo:hover {
+    opacity: 0.8;
+}
+
+.sm-logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* ============================================
+   Toggle Button
+============================================ */
+
+.sm-toggle {
     position: relative;
-    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--apple-text-primary, #1d1d1f);
+    font-weight: 600;
+    font-size: 16px;
+    padding: 8px 12px;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    border-radius: 8px;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+[data-theme='dark'] .sm-toggle {
+    color: #f5f5f7;
 }
 
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 768px) {
-    .sections-nav {
-        top: 60px;
-        padding: 8px 0;
-    }
-
-    .sections-tabs {
-        padding: 0 16px;
-        justify-content: center;
-        gap: 6px;
-    }
-
-    .section-tab {
-        font-size: 13px;
-        padding: 8px 14px;
-    }
+.sm-toggle:hover {
+    opacity: 0.8;
+    background: rgba(0, 0, 0, 0.05);
 }
 
-@media (max-width: 480px) {
-    .sections-tabs {
-        padding: 0 12px;
-        gap: 6px;
-    }
-
-    .section-tab {
-        font-size: 12px;
-        padding: 6px 12px;
-    }
+[data-theme='dark'] .sm-toggle:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.section-tab:focus-visible {
-    outline: 2px solid var(--nav-primary);
+.sm-toggle:focus-visible {
+    outline: 2px solid var(--sm-accent);
     outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
+.sm-toggle-textWrap {
+    position: relative;
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 60px;
+}
 
-    .section-tab,
-    .section-tab::before {
+.sm-toggle-textInner {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.sm-toggle-line {
+    display: block;
+    height: 1em;
+    line-height: 1;
+}
+
+.sm-icon {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sm-icon-line {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transform: translate(-50%, -50%);
+}
+
+/* ============================================
+   Panel Layers (Background)
+============================================ */
+
+.sm-prelayers {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: clamp(320px, 42vw, 520px);
+    pointer-events: none;
+    z-index: 999;
+}
+
+[data-position='left'] .sm-prelayers {
+    right: auto;
+    left: 0;
+}
+
+.sm-prelayer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+}
+
+/* ============================================
+   Main Panel
+============================================ */
+
+.staggered-menu-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: clamp(320px, 42vw, 520px);
+    height: 100%;
+    background: var(--bg-primary, #ffffff);
+    display: flex;
+    flex-direction: column;
+    padding: 6rem 2.5rem 2.5rem;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
+    transition: background 0.3s ease;
+}
+
+[data-theme='dark'] .staggered-menu-panel {
+    background: var(--bg-primary, #1a1a1a);
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-position='left'] .staggered-menu-panel {
+    right: auto;
+    left: 0;
+    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.12);
+}
+
+.sm-panel-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ============================================
+   Menu Items
+============================================ */
+
+.sm-panel-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sm-panel-itemWrap {
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+}
+
+.sm-panel-item {
+    position: relative;
+    color: var(--text-primary, #1d1d1f);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 6vw, 3.5rem);
+    cursor: pointer;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+    padding-right: 1.5em;
+}
+
+[data-theme='dark'] .sm-panel-item {
+    color: #f5f5f7;
+}
+
+.sm-panel-itemLabel {
+    display: inline-block;
+    will-change: transform;
+    transform-origin: 50% 100%;
+}
+
+.sm-panel-item:hover,
+.sm-panel-item.active {
+    color: var(--sm-accent, #00e965);
+}
+
+/* Item Numbering */
+.sm-panel-list[data-numbering] {
+    counter-reset: smItem;
+}
+
+.sm-panel-list[data-numbering] .sm-panel-item::after {
+    counter-increment: smItem;
+    content: counter(smItem, decimal-leading-zero);
+    position: absolute;
+    top: 0.15em;
+    right: 0.3em;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--sm-accent, #00e965);
+    letter-spacing: 0;
+    pointer-events: none;
+    user-select: none;
+    opacity: var(--sm-num-opacity, 0);
+    transition: opacity 0.3s ease;
+}
+
+/* ============================================
+   User Section
+============================================ */
+
+.sm-user-section {
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-color, rgba(0, 0, 0, 0.1));
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+[data-theme='dark'] .sm-user-section {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.sm-user-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg-secondary, #f5f5f7);
+    border-radius: 14px;
+    transition: background 0.3s ease;
+}
+
+[data-theme='dark'] .sm-user-info {
+    background: var(--bg-secondary, #2a2a2a);
+}
+
+.sm-user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.sm-user-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary, #1d1d1f);
+    transition: color 0.3s ease;
+}
+
+[data-theme='dark'] .sm-user-name {
+    color: #f5f5f7;
+}
+
+/* ============================================
+   Actions (Theme & Auth)
+============================================ */
+
+.sm-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sm-theme-btn,
+.sm-auth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.28, 0.11, 0.32, 1);
+    text-decoration: none;
+}
+
+.sm-theme-btn {
+    background: var(--bg-secondary, #f5f5f7);
+    color: var(--text-primary, #1d1d1f);
+    border: 2px solid transparent;
+}
+
+[data-theme='dark'] .sm-theme-btn {
+    background: var(--bg-secondary, #2a2a2a);
+    color: #f5f5f7;
+}
+
+.sm-theme-btn:hover {
+    background: var(--hover-bg, #e5e5e5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .sm-theme-btn:hover {
+    background: var(--hover-bg, #3a3a3a);
+}
+
+.sm-theme-icon {
+    font-size: 20px;
+}
+
+.sm-theme-text {
+    font-size: 15px;
+}
+
+.sm-auth-btn.login {
+    background: var(--primary-green, #00e965);
+    color: #1d1d1f;
+    font-weight: 700;
+}
+
+.sm-auth-btn.login:hover {
+    background: var(--light-green, #66ffaa);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 233, 101, 0.3);
+}
+
+.sm-auth-btn.logout {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 2px solid rgba(255, 68, 68, 0.3);
+    font-weight: 600;
+}
+
+.sm-auth-btn.logout:hover {
+    background: rgba(255, 68, 68, 0.15);
+    border-color: rgba(255, 68, 68, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 68, 68, 0.2);
+}
+
+/* ============================================
+   Responsive
+============================================ */
+
+@media (max-width: 1024px) {
+
+    .staggered-menu-panel,
+    .sm-prelayers {
+        width: 100%;
+    }
+
+    .sm-panel-item {
+        font-size: clamp(2rem, 8vw, 2.8rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .staggered-menu-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .staggered-menu-panel {
+        padding: 5rem 1.5rem 1.5rem;
+    }
+
+    .sm-panel-item {
+        font-size: clamp(1.8rem, 10vw, 2.2rem);
+        letter-spacing: -1px;
+    }
+
+    .sm-logo-text {
+        font-size: 18px;
+    }
+
+    .sm-actions {
+        gap: 10px;
+    }
+
+    .sm-theme-btn,
+    .sm-auth-btn {
+        padding: 13px 20px;
+        font-size: 15px;
+    }
+}
+
+/* ============================================
+   Accessibility
+============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+.sm-panel-item:focus-visible,
+.sm-theme-btn:focus-visible,
+.sm-auth-btn:focus-visible {
+    outline: 3px solid var(--sm-accent, #00e965);
+    outline-offset: 3px;
+}
+
+/* ============================================
+   Submenu (Подкатегории)
+============================================ */
+
+.sm-submenu-wrapper {
+    width: 100%;
+}
+
+.sm-panel-item.submenu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sm-submenu-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--sm-accent, #00e965);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.sm-panel-item.submenu-toggle.expanded .sm-submenu-arrow {
+    transform: rotate(180deg);
+}
+
+.sm-submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.28, 0.11, 0.32, 1);
+}
+
+.sm-submenu.expanded {
+    max-height: 800px;
+    margin-top: 1rem;
+}
+
+.sm-submenu-item {
+    margin-bottom: 0.5rem;
+}
+
+.sm-submenu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-secondary, #f5f5f7);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary, #1d1d1f);
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+[data-theme='dark'] .sm-submenu-link {
+    background: var(--bg-secondary, #2a2a2a);
+    color: #f5f5f7;
+}
+
+.sm-submenu-link:hover {
+    background: var(--hover-bg, #e5e5e5);
+    transform: translateX(4px);
+    border-color: var(--sm-accent, #00e965);
+}
+
+[data-theme='dark'] .sm-submenu-link:hover {
+    background: var(--hover-bg, #3a3a3a);
+}
+
+.sm-submenu-link.active {
+    background: var(--sm-accent, #00e965);
+    color: #1d1d1f;
+    font-weight: 700;
+    transform: translateX(4px);
+}
+
+.sm-submenu-icon {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.sm-submenu-label {
+    flex: 1;
+}
+
+/* Responsive для подменю */
+@media (max-width: 768px) {
+    .sm-submenu-link {
+        padding: 10px 14px;
+        font-size: 15px;
+    }
+
+    .sm-submenu-icon {
+        font-size: 18px;
+        width: 24px;
+        height: 24px;
+    }
+
+    .sm-submenu.expanded {
+        margin-top: 0.75rem;
     }
 }
 

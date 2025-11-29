@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import Navigation from './components/Navigation';
+import StaggeredMenu from './components/StaggeredMenu';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import BooksPage from './pages/BooksPage';
@@ -10,8 +10,8 @@ import BookDetailPage from './pages/BookDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import AuthPage from './pages/AuthPage';
 import AdminPage from './pages/AdminPage';
-import PrivacyPage from './pages/PrivacyPage'; // ✅ ДОБАВЛЕНО
-import SectionsPage from './pages/SectionsPage';
+import PrivacyPage from './pages/PrivacyPage';
+// Разделы напрямую
 import MethodClubPage from './pages/sections/MethodClubPage';
 import PioneersWorkPage from './pages/sections/PioneersWorkPage';
 import SchoolLeadersPage from './pages/sections/SchoolLeadersPage';
@@ -31,36 +31,43 @@ function App() {
             <AuthProvider>
                 <Router>
                     <div className="app">
-                        <Navigation />
+                        {/* Анимированное меню с подкатегориями */}
+                        <StaggeredMenu
+                            position="right"
+                            colors={['#667eea', '#764ba2']}
+                            logoText="📚 Библиотека Пионеров"
+                            displayItemNumbering={true}
+                            accentColor="#00e965"
+                            menuButtonColor="#1d1d1f"
+                            openMenuButtonColor="#1d1d1f"
+                            changeMenuColorOnOpen={false}
+                            closeOnClickAway={true}
+                        />
+
                         <main className="main-content">
                             <Routes>
+                                {/* Основные страницы */}
                                 <Route path="/" element={<LandingPage />} />
                                 <Route path="/books" element={<BooksPage />} />
                                 <Route path="/books/:id" element={<BookDetailPage />} />
                                 <Route path="/favorites" element={<FavoritesPage />} />
                                 <Route path="/auth" element={<AuthPage />} />
                                 <Route path="/admin" element={<AdminPage />} />
-                                <Route path="/privacy" element={<PrivacyPage />} /> {/* ✅ ДОБАВЛЕНО */}
+                                <Route path="/privacy" element={<PrivacyPage />} />
 
-                                {/* Разделы */}
-                                <Route path="/sections/*" element={
-                                    <SectionsPage>
-                                        <Routes>
-                                            <Route path="methodclub" element={<MethodClubPage />} />
-                                            <Route path="pioneers" element={<PioneersWorkPage />} />
-                                            <Route path="leaders" element={<SchoolLeadersPage />} />
-                                            <Route path="volunteers" element={<VolunteersPage />} />
-                                            <Route path="media" element={<SchoolMediaPage />} />
-                                            <Route path="games" element={<GamesPage />} />
-                                            <Route path="scenarios" element={<ScenariosPage />} />
-                                            <Route path="book" element={<PioneerBookPage />} />
-                                            <Route path="exchange" element={<ExchangePage />} />
-                                            <Route path="contacts" element={<ContactsPage />} />
-                                            <Route path="calendar" element={<CalendarPage />} />
-                                            <Route path="documents" element={<DocumentsPage />} />
-                                        </Routes>
-                                    </SectionsPage>
-                                } />
+                                {/* Разделы - прямые роуты без обертки */}
+                                <Route path="/sections/methodclub" element={<MethodClubPage />} />
+                                <Route path="/sections/pioneers" element={<PioneersWorkPage />} />
+                                <Route path="/sections/leaders" element={<SchoolLeadersPage />} />
+                                <Route path="/sections/volunteers" element={<VolunteersPage />} />
+                                <Route path="/sections/media" element={<SchoolMediaPage />} />
+                                <Route path="/sections/games" element={<GamesPage />} />
+                                <Route path="/sections/scenarios" element={<ScenariosPage />} />
+                                <Route path="/sections/book" element={<PioneerBookPage />} />
+                                <Route path="/sections/exchange" element={<ExchangePage />} />
+                                <Route path="/sections/contacts" element={<ContactsPage />} />
+                                <Route path="/sections/calendar" element={<CalendarPage />} />
+                                <Route path="/sections/documents" element={<DocumentsPage />} />
                             </Routes>
                         </main>
                         <Footer />
