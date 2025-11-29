@@ -12,11 +12,12 @@
     align-items: center;
     min-height: 600px;
     padding: var(--spacing-3xl) var(--spacing-md);
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: 0;
+    /* ✅ ИЗМЕНЕНО: было var(--spacing-2xl) */
     overflow: hidden;
     background: transparent;
-    /* УБРАЛИ градиент */
 }
+
 
 /* Hero Content */
 .hero-content-wrapper {

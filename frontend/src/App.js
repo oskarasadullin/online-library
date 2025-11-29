@@ -14,6 +14,15 @@ import MethodClubPage from './pages/sections/MethodClubPage';
 import PioneersWorkPage from './pages/sections/PioneersWorkPage';
 import SchoolLeadersPage from './pages/sections/SchoolLeadersPage';
 import VolunteersPage from './pages/sections/VolunteersPage';
+import SchoolMediaPage from './pages/sections/SchoolMediaPage';
+import GamesPage from './pages/sections/GamesPage'; // ✅ ДОБАВЛЕНО
+import ScenariosPage from './pages/sections/ScenariosPage'; // ✅ ДОБАВЛЕНО
+import PioneerBookPage from './pages/sections/PioneerBookPage'; // ✅ ДОБАВЛЕНО
+import ExchangePage from './pages/sections/ExchangePage';
+import ContactsPage from './pages/sections/ContactsPage';
+import CalendarPage from './pages/sections/CalendarPage';
+import DocumentsPage from './pages/sections/DocumentsPage';
+
 
 function App() {
     return (
@@ -31,7 +40,7 @@ function App() {
                                 <Route path="/auth" element={<AuthPage />} />
                                 <Route path="/admin" element={<AdminPage />} />
 
-                                {/* Разделы - теперь один общий SectionsPage */}
+                                {/* Разделы */}
                                 <Route path="/sections/*" element={
                                     <SectionsPage>
                                         <Routes>
@@ -39,6 +48,14 @@ function App() {
                                             <Route path="pioneers" element={<PioneersWorkPage />} />
                                             <Route path="leaders" element={<SchoolLeadersPage />} />
                                             <Route path="volunteers" element={<VolunteersPage />} />
+                                            <Route path="media" element={<SchoolMediaPage />} />
+                                            <Route path="games" element={<GamesPage />} /> {/* ✅ ДОБАВЛЕНО */}
+                                            <Route path="scenarios" element={<ScenariosPage />} /> {/* ✅ ДОБАВЛЕНО */}
+                                            <Route path="book" element={<PioneerBookPage />} /> {/* ✅ ДОБАВЛЕНО */}
+                                            <Route path="exchange" element={<ExchangePage />} />
+                                            <Route path="contacts" element={<ContactsPage />} />
+                                            <Route path="calendar" element={<CalendarPage />} />
+                                            <Route path="documents" element={<DocumentsPage />} />
                                         </Routes>
                                     </SectionsPage>
                                 } />
@@ -51,5 +68,6 @@ function App() {
         </ThemeProvider>
     );
 }
+
 
 export default App;

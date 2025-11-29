@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Iridescence from '../../components/Iridescence';
 import '../../styles/PioneersWorkPage.css';
 
 const PioneersWorkPage = () => {
@@ -52,10 +53,12 @@ const PioneersWorkPage = () => {
         <div className="pioneers-work-page">
             {/* Hero Section */}
             <div className="pioneers-hero">
-                <div className="hero-background">
-                    <div className="hero-gradient"></div>
-                    <div className="hero-blur"></div>
-                </div>
+                <Iridescence
+                    color={[0.4, 0.49, 0.92]}
+                    mouseReact={false}
+                    amplitude={0.1}
+                    speed={0.5}
+                />
 
                 <div className="hero-content-wrapper">
                     <div className="hero-content">

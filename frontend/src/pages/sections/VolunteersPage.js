@@ -1,4 +1,5 @@
 import React from 'react';
+import Iridescence from '../../components/Iridescence';
 import '../../styles/VolunteersPage.css';
 
 const VolunteersPage = () => {
@@ -6,10 +7,12 @@ const VolunteersPage = () => {
         <div className="volunteers-page">
             {/* Hero Section */}
             <div className="volunteers-hero">
-                <div className="hero-background">
-                    <div className="hero-gradient"></div>
-                    <div className="hero-blur"></div>
-                </div>
+                <Iridescence
+                    color={[0.4, 0.49, 0.92]}
+                    mouseReact={false}
+                    amplitude={0.1}
+                    speed={0.5}
+                />
 
                 <div className="hero-content-wrapper">
                     <div className="hero-content">

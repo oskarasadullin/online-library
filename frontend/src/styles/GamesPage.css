@@ -1,0 +1,360 @@
+/* ==================== GAMES PAGE ==================== */
+.games-page {
+    width: 100%;
+    overflow: hidden;
+}
+
+/* ==================== HERO SECTION ==================== */
+.games-hero {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 600px;
+    padding: var(--spacing-3xl) var(--spacing-md);
+    margin-bottom: 0;
+    overflow: hidden;
+    background: transparent;
+}
+
+.hero-content-wrapper {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-xl);
+    max-width: 1400px;
+    width: 100%;
+}
+
+.hero-content {
+    flex: 1;
+    max-width: 600px;
+}
+
+.hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 6vw, 80px);
+    font-weight: 700;
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--apple-white);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.hero-subtitle {
+    font-size: clamp(19px, 2vw, 24px);
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin: 0;
+    font-weight: 400;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== HERO ILLUSTRATION ==================== */
+.hero-image {
+    flex: 0 0 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 500px;
+}
+
+.hero-illustration-games {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-character {
+    position: absolute;
+    animation: characterFloat 4s ease-in-out infinite;
+}
+
+.character-1 {
+    top: 20%;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.character-2 {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 0.5s;
+}
+
+.character-3 {
+    bottom: 20%;
+    right: 20%;
+    animation-delay: 1s;
+}
+
+.character-body {
+    width: 100px;
+    height: 120px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40px 40px 20px 20px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    position: relative;
+}
+
+.character-body.yellow {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+@keyframes characterFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.floating-element {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.8;
+    animation: elementFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+}
+
+.element-1 {
+    top: 10%;
+    right: 10%;
+    animation-delay: 0s;
+}
+
+.element-2 {
+    bottom: 15%;
+    left: 10%;
+    animation-delay: 1s;
+}
+
+.element-3 {
+    top: 40%;
+    right: 5%;
+    animation-delay: 2s;
+}
+
+@keyframes elementFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-30px) rotate(10deg);
+    }
+}
+
+/* ==================== GAMES CONTENT ==================== */
+.games-content-section {
+    padding: var(--spacing-2xl) var(--spacing-md);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Filters */
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: var(--spacing-xl);
+    justify-content: center;
+}
+
+.filter-btn {
+    padding: 12px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-button);
+    color: var(--apple-text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s var(--transition-smooth);
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background: var(--hover-bg);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+}
+
+/* Games Grid */
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.game-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: all 0.5s var(--transition-smooth);
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeInUp 0.6s var(--transition-smooth) forwards;
+    animation-delay: calc(var(--card-index) * 0.1s);
+}
+
+.game-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.game-card-image {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.game-card-image.blue {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+}
+
+.game-card-image.green {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+}
+
+.game-card-image.yellow {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.game-badge {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.game-card-body {
+    padding: var(--spacing-md);
+}
+
+.game-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--apple-text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+    line-height: 1.3;
+}
+
+.game-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.game-category,
+.game-subcategory {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--apple-text-secondary);
+    text-transform: uppercase;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .games-hero {
+        min-height: auto;
+        padding: var(--spacing-2xl) var(--spacing-md);
+    }
+
+    .hero-content-wrapper {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-title {
+        font-size: clamp(36px, 8vw, 48px);
+    }
+
+    .hero-image {
+        flex: 0 0 auto;
+        height: 400px;
+    }
+
+    .filters-container {
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+    }
+
+    .filters-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
