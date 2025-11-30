@@ -13,7 +13,7 @@ const Footer = () => {
         <footer className="footer">
             <div className="footer-container">
                 <div className="footer-left">
-                    <span className="footer-copyright">© 2024 РДОО "ПБ"</span>
+                    <span className="footer-copyright">© 2025 РДОО "ПБ"</span>
                 </div>
 
                 <div className="footer-center">

@@ -36,13 +36,13 @@ function App() {
                             position="right"
                             colors={['#667eea', '#764ba2']}
                             logoText="📚 Библиотека Пионеров"
-                            displayItemNumbering={true}
-                            accentColor="#00e965"
+                            accentColor="#667eea"  // ← Было #00e965, теперь фиолетовый
                             menuButtonColor="#1d1d1f"
                             openMenuButtonColor="#1d1d1f"
                             changeMenuColorOnOpen={false}
                             closeOnClickAway={true}
                         />
+
 
                         <main className="main-content">
                             <Routes>
