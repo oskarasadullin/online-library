@@ -309,6 +309,12 @@ if __name__ == '__main__':
 
 
 
+==== FILE: .\d ====
+* [32mfeature/staggered-menu[m
+  main[m
+
+
+
 ==== FILE: .\docker-compose.yml ====
 version: '3.8'
 
@@ -686,6 +692,12 @@ if __name__ == '__main__':
     print(f"Собираю код в {OUTPUT_FILE}...")
     collect_files()
     print(f"Готово! Файл сохранён в {OUTPUT_FILE}")
+
+
+
+==== FILE: .\d ====
+* [32mfeature/staggered-menu[m
+  main[m
 
 
 
@@ -3548,7 +3560,7 @@ const Footer = () => {
         <footer className="footer">
             <div className="footer-container">
                 <div className="footer-left">
-                    <span className="footer-copyright">© 2024 РДОО "ПБ"</span>
+                    <span className="footer-copyright">© 2025 РДОО "ПБ"</span>
                 </div>
 
                 <div className="footer-center">
@@ -5660,7 +5672,7 @@ const LandingPage = () => {
         },
         {
             icon: '📥',
-            title: 'Офлайн-доступ',
+            title: 'Оффлайн-доступ',
             description: 'Скачивайте книги для чтения без подключения к интернету в любое время.',
             link: '/books'
         }
@@ -5706,9 +5718,9 @@ const LandingPage = () => {
 
                 {/* Контент поверх Ballpit */}
                 <div className="hero-content">
-                    <h1 className="hero-title">Онлайн-библиотека Пионеров Башкортостана</h1>
+                    <h1 className="hero-title">Методическая библиотека Пионеров Башкортостана</h1>
                     <p className="hero-description">
-                        Читайте, сохраняйте и делитесь впечатлениями о любимых произведениях
+                        Читайте, обучайтесь, сохраняйте материалы и делитесь впечатлениями о любимых произведениях
                     </p>
                     <div className="hero-actions">
                         <Link to="/books" className="btn-primary">
@@ -11178,7 +11190,8 @@ export default api;
 
 
 ==== FILE: .\frontend\src\styles\Footer.css ====
-/* ==================== FOOTER ==================== */
+/* FOOTER */
+
 .footer {
     width: 100%;
     background: var(--bg-primary);
@@ -11186,6 +11199,8 @@ export default api;
     padding: 24px 0;
     margin-top: auto;
     transition: background 0.3s ease, border-color 0.3s ease;
+    position: relative;
+    z-index: 100;
 }
 
 .footer-container {
@@ -11203,6 +11218,9 @@ export default api;
 .footer-right {
     display: flex;
     align-items: center;
+    pointer-events: auto;
+    position: relative;
+    z-index: 101;
 }
 
 .footer-copyright {
@@ -11231,22 +11249,24 @@ export default api;
     border: none;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: color 0.3s ease, background 0.3s ease;
     padding: 8px 12px;
     border-radius: 6px;
+    pointer-events: auto;
+    position: relative;
+    z-index: 102;
 }
 
 .footer-scroll-top:hover {
     color: var(--text-primary, rgba(255, 255, 255, 0.95));
     background: var(--hover-bg, rgba(255, 255, 255, 0.05));
-    transform: translateY(-2px);
 }
 
 .footer-scroll-top:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
-/* ==================== DARK THEME ==================== */
+/* DARK THEME */
 .dark .footer {
     background: var(--bg-primary, #0a0a0a);
     border-top-color: rgba(255, 255, 255, 0.1);
@@ -11263,7 +11283,7 @@ export default api;
     color: rgba(255, 255, 255, 0.95);
 }
 
-/* ==================== RESPONSIVE ==================== */
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .footer-container {
         flex-direction: column;
@@ -11302,7 +11322,7 @@ export default api;
     }
 }
 
-/* ==================== ACCESSIBILITY ==================== */
+/* ACCESSIBILITY */
 .footer-scroll-top:focus-visible {
     outline: 2px solid var(--primary, #667eea);
     outline-offset: 2px;
@@ -15291,16 +15311,18 @@ html {
     height: 100vh;
     overflow: hidden;
     pointer-events: none;
+    z-index: 100;
+    /* ← ПОНИЖЕН */
 }
 
 .staggered-menu-wrapper.fixed-wrapper>* {
     pointer-events: auto;
 }
 
-/* Header */
+/* Header - ОДИН раз определён */
 
 .staggered-menu-header {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -15308,8 +15330,13 @@ html {
     align-items: center;
     justify-content: space-between;
     padding: 1.5rem 2.5rem;
-    pointer-events: none;
+    pointer-events: auto;
     z-index: 1001;
+    background: #ffffff00;
+}
+
+[data-theme='dark'] .staggered-menu-header {
+    background: #00000000;
 }
 
 .staggered-menu-header>* {
@@ -15911,30 +15938,6 @@ html {
 .sm-auth-btn:focus-visible {
     outline: 2px solid var(--sm-accent);
     outline-offset: 3px;
-}
-
-/* Header - статичный наверху */
-
-.staggered-menu-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem 2.5rem;
-    pointer-events: auto;
-    z-index: 1001;
-    background: #ffffff00;
-}
-
-[data-theme='dark'] .staggered-menu-header {
-    background: #00000000;
-}
-
-.staggered-menu-header>* {
-    pointer-events: auto;
 }
 
 
