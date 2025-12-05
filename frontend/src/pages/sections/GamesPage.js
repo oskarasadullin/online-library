@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Iridescence from '../../components/Iridescence';
+import { IoGameController } from 'react-icons/io5';
 import '../../styles/GamesPage.css';
 
 const GamesPage = () => {
@@ -73,19 +74,10 @@ const GamesPage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-games">
-                            <div className="game-character character-1">
-                                <div className="character-body yellow">🏆</div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <IoGameController className="main-icon" />
                             </div>
-                            <div className="game-character character-2">
-                                <div className="character-body yellow">💬</div>
-                            </div>
-                            <div className="game-character character-3">
-                                <div className="character-body yellow">📱</div>
-                            </div>
-                            <div className="floating-element element-1">❤️</div>
-                            <div className="floating-element element-2">👍</div>
-                            <div className="floating-element element-3">💬</div>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { MdVolunteerActivism } from 'react-icons/md';
 import '../../styles/VolunteersPage.css';
 
 const VolunteersPage = () => {
@@ -26,15 +27,9 @@ const VolunteersPage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-volunteers">
-                            <div className="volunteer-character character-1">
-                                <div className="puzzle-piece piece-green"></div>
-                            </div>
-                            <div className="volunteer-character character-2">
-                                <div className="puzzle-piece piece-yellow"></div>
-                            </div>
-                            <div className="volunteer-character character-3">
-                                <div className="puzzle-piece piece-blue"></div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <MdVolunteerActivism className="main-icon" />
                             </div>
                         </div>
                     </div>

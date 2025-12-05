@@ -1,5 +1,6 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { MdPermMedia } from 'react-icons/md';
 import '../../styles/SchoolMediaPage.css';
 
 const SchoolMediaPage = () => {
@@ -25,27 +26,10 @@ const SchoolMediaPage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-media">
-                            <div className="media-podium">
-                                <div className="podium-top">
-                                    <div className="podium-number">1</div>
-                                </div>
-                                <div className="podium-base"></div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <MdPermMedia className="main-icon" />
                             </div>
-                            <div className="media-character character-left">
-                                <div className="character-body">
-                                    <div className="trophy-icon">🏆</div>
-                                </div>
-                            </div>
-                            <div className="media-character character-right">
-                                <div className="character-body">
-                                    <div className="laptop-icon">💻</div>
-                                </div>
-                            </div>
-                            <div className="floating-element element-1">💬</div>
-                            <div className="floating-element element-2">▶️</div>
-                            <div className="floating-element element-3">❤️</div>
-                            <div className="floating-element element-4">📊</div>
                         </div>
                     </div>
                 </div>

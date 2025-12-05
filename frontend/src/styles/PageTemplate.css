@@ -1,23 +1,6 @@
-/* ==================== VOLUNTEERS PAGE - APPLE PRO STYLE ==================== */
+/* ==================== UNIVERSAL PAGE TEMPLATE ==================== */
 
-.volunteers-page {
-    width: 100%;
-    overflow: hidden;
-}
-
-/* ==================== HERO SECTION ==================== */
-
-.volunteers-hero {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: var(--spacing-3xl) var(--spacing-md);
-    margin-bottom: var(--spacing-2xl);
-    overflow: hidden;
-    background: transparent;
-}
+/* Hero Section */
 
 .hero-content-wrapper {
     position: relative;
@@ -44,18 +27,18 @@
     line-height: 1.05;
     letter-spacing: -0.02em;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.1s both;
 }
 
 .hero-subtitle {
-    font-size: clamp(17px, 2vw, 21px);
+    font-size: clamp(19px, 2vw, 24px);
     color: rgba(255, 255, 255, 0.9);
     line-height: 1.6;
     margin: 0;
     font-weight: 400;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.25s both;
 }
-
-/* Hero Illustration - Icon */
 
 .hero-image {
     flex: 0 0 500px;
@@ -64,6 +47,7 @@
     align-items: center;
     position: relative;
     height: 500px;
+    animation: fadeInUp 0.8s var(--transition-smooth) 0.4s both;
 }
 
 .hero-illustration {
@@ -120,79 +104,67 @@
     filter: drop-shadow(0 40px 80px rgba(102, 126, 234, 0.8)) !important;
 }
 
-/* ==================== CONTENT SECTION ==================== */
+/* Content Section */
 
-.volunteers-content-section {
+.content-section {
     padding: var(--spacing-2xl) var(--spacing-md);
     max-width: 1400px;
     margin: 0 auto;
+    position: relative;
+}
+
+.content-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1000px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.content-container {
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-md);
+    position: relative;
+    z-index: 1;
 }
 
 .section-title {
     font-family: var(--font-display);
-    font-size: clamp(36px, 4vw, 48px);
-    font-weight: 700;
-    margin: 0 0 var(--spacing-xl) 0;
+    font-size: 32px;
+    font-weight: 600;
     color: var(--apple-text-primary);
-    letter-spacing: -0.02em;
+    margin: 0 0 var(--spacing-md);
     transition: color 0.3s ease;
 }
 
-.content-placeholder {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-xl);
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--glass-shadow);
-}
-
-.placeholder-text {
-    font-size: 19px;
+.section-description {
+    font-size: 18px;
     color: var(--apple-text-secondary);
-    text-align: center;
+    margin: 0;
+    transition: color 0.3s ease;
 }
 
-/* ==================== ANIMATIONS ==================== */
+/* Animations */
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(40px) translateZ(0);
+        transform: translateY(40px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0) translateZ(0);
+        transform: translateY(0);
     }
 }
 
-.hero-title {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.1s both;
-}
-
-.hero-subtitle {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.25s both;
-}
-
-.hero-image {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.4s both;
-}
-
-.section-title {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.2s both;
-}
-
-.content-placeholder {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.35s both;
-}
-
-/* ==================== RESPONSIVE ==================== */
+/* Responsive */
 
 @media (max-width: 1024px) {
     .hero-content-wrapper {
@@ -210,14 +182,23 @@
 }
 
 @media (max-width: 768px) {
-    .volunteers-hero {
+    [class*="-hero"] {
+        min-height: auto;
         padding: var(--spacing-2xl) var(--spacing-md);
     }
 
     .hero-content-wrapper {
         flex-direction: column;
-        text-align: center;
         gap: var(--spacing-xl);
+        text-align: center;
+    }
+
+    .hero-title {
+        font-size: clamp(36px, 8vw, 48px);
+    }
+
+    .hero-subtitle {
+        font-size: clamp(17px, 3vw, 19px);
     }
 
     .hero-image {
@@ -229,9 +210,11 @@
         width: 280px;
         height: 280px;
     }
-}
 
-/* ==================== ACCESSIBILITY ==================== */
+    .content-section {
+        padding: var(--spacing-xl) var(--spacing-md);
+    }
+}
 
 @media (prefers-reduced-motion: reduce) {
 
@@ -239,6 +222,7 @@
     *::before,
     *::after {
         animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
 }

@@ -1,10 +1,12 @@
 /* ==================== GAMES PAGE ==================== */
+
 .games-page {
     width: 100%;
     overflow: hidden;
 }
 
 /* ==================== HERO SECTION ==================== */
+
 .games-hero {
     position: relative;
     display: flex;
@@ -53,9 +55,10 @@
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* ==================== HERO ILLUSTRATION ==================== */
+/* ==================== HERO ILLUSTRATION - ICON ==================== */
+
 .hero-image {
-    flex: 0 0 450px;
+    flex: 0 0 500px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -63,7 +66,7 @@
     height: 500px;
 }
 
-.hero-illustration-games {
+.hero-illustration {
     position: relative;
     width: 100%;
     height: 100%;
@@ -72,52 +75,12 @@
     align-items: center;
 }
 
-.game-character {
-    position: absolute;
-    animation: characterFloat 4s ease-in-out infinite;
-}
-
-.character-1 {
-    top: 20%;
-    left: 20%;
-    animation-delay: 0s;
-}
-
-.character-2 {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation-delay: 0.5s;
-}
-
-.character-3 {
-    bottom: 20%;
-    right: 20%;
-    animation-delay: 1s;
-}
-
-.character-body {
-    width: 100px;
-    height: 120px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 40px 40px 20px 20px;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 50px;
+.icon-wrapper {
     position: relative;
+    animation: iconFloat 6s ease-in-out infinite;
 }
 
-.character-body.yellow {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
-    border-color: rgba(251, 191, 36, 0.5);
-}
-
-@keyframes characterFloat {
+@keyframes iconFloat {
 
     0%,
     100% {
@@ -125,49 +88,40 @@
     }
 
     50% {
-        transform: translateY(-20px);
+        transform: translateY(-30px);
     }
 }
 
-.floating-element {
-    position: absolute;
-    font-size: 2rem;
-    opacity: 0.8;
-    animation: elementFloat 4s ease-in-out infinite;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+.main-icon {
+    width: 380px;
+    height: 380px;
+    color: rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4));
+    animation: iconPulse 3s ease-in-out infinite;
+    transition: all 0.6s ease;
 }
 
-.element-1 {
-    top: 10%;
-    right: 10%;
-    animation-delay: 0s;
-}
-
-.element-2 {
-    bottom: 15%;
-    left: 10%;
-    animation-delay: 1s;
-}
-
-.element-3 {
-    top: 40%;
-    right: 5%;
-    animation-delay: 2s;
-}
-
-@keyframes elementFloat {
+@keyframes iconPulse {
 
     0%,
     100% {
-        transform: translateY(0) rotate(0deg);
+        transform: scale(1);
+        filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4));
     }
 
     50% {
-        transform: translateY(-30px) rotate(10deg);
+        transform: scale(1.05);
+        filter: drop-shadow(0 35px 70px rgba(102, 126, 234, 0.6));
     }
 }
 
+.main-icon:hover {
+    transform: scale(1.1) !important;
+    filter: drop-shadow(0 40px 80px rgba(102, 126, 234, 0.8)) !important;
+}
+
 /* ==================== GAMES CONTENT ==================== */
+
 .games-content-section {
     padding: var(--spacing-2xl) var(--spacing-md);
     max-width: 1400px;
@@ -175,6 +129,7 @@
 }
 
 /* Filters */
+
 .filters-container {
     display: flex;
     flex-wrap: wrap;
@@ -212,6 +167,7 @@
 }
 
 /* Games Grid */
+
 .games-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -298,6 +254,7 @@
 }
 
 /* ==================== ANIMATIONS ==================== */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -311,6 +268,18 @@
 }
 
 /* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 1024px) {
+    .hero-image {
+        flex: 0 0 400px;
+    }
+
+    .main-icon {
+        width: 320px;
+        height: 320px;
+    }
+}
+
 @media (max-width: 768px) {
     .games-hero {
         min-height: auto;
@@ -329,6 +298,11 @@
     .hero-image {
         flex: 0 0 auto;
         height: 400px;
+    }
+
+    .main-icon {
+        width: 280px;
+        height: 280px;
     }
 
     .filters-container {

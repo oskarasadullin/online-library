@@ -1,48 +1,41 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { IoDocuments } from 'react-icons/io5';
 import '../../styles/DocumentsPage.css';
 
 const DocumentsPage = () => {
     return (
         <div className="documents-page">
-            {/* Hero Section */}
             <div className="documents-hero">
-                <Iridescence
-                    color={[0.5, 0.6, 0.8]}
-                    mouseReact={false}
-                    amplitude={0.1}
-                    speed={1}
-                />
-
+                <Iridescence color={[0.5, 0.6, 0.8]} mouseReact={false} amplitude={0.1} speed={1} />
                 <div className="hero-content-wrapper">
                     <div className="hero-content">
                         <h1 className="hero-title">
-                            Документы и<br />нормативно-<br />правовая база
+                            Документы<br />
+                            и формы
                         </h1>
                         <p className="hero-subtitle">
-                            Актуальная информация о деятельности<br />
-                            детского движения
+                            Официальные документы, бланки<br />
+                            и нормативные акты
                         </p>
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-documents">
-                            <div className="folder-stack">
-                                <div className="folder folder-1">📁</div>
-                                <div className="folder folder-2">📁</div>
-                                <div className="folder folder-3">📄</div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <IoDocuments className="main-icon" />
                             </div>
-                            <div className="floating-element element-1">📋</div>
-                            <div className="floating-element element-2">✓</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Content Section */}
-            <div className="documents-content">
-                <div className="content-placeholder">
-                    <p className="placeholder-text">Документы скоро появятся</p>
+            <div className="content-section">
+                <div className="content-container">
+                    <h2 className="section-title">Скоро здесь появится контент</h2>
+                    <p className="section-description">
+                        Мы работаем над наполнением этого раздела полезными материалами
+                    </p>
                 </div>
             </div>
         </div>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Iridescence from '../components/Iridescence';
 import BookCard from '../components/BookCard';
 import SearchFilters from '../components/SearchFilters';
 import { booksAPI } from '../services/api';
+import { HiBookOpen } from 'react-icons/hi';
 import '../styles/BooksPage.css';
 
 const BooksPage = () => {
@@ -14,7 +16,6 @@ const BooksPage = () => {
         loadBooks();
     }, [filters]);
 
-    // Intersection Observer для появления карточек
     useEffect(() => {
         if (books.length === 0) return;
 
@@ -55,33 +56,43 @@ const BooksPage = () => {
 
     return (
         <div className="books-page">
-            <div className="books-container">
-                {/* Premium Header */}
-                <header className="page-header">
-                    <h1>Библиотека</h1>
-                    <p className="page-subtitle">
-                        Откройте для себя тысячи удивительных книг
-                    </p>
-                </header>
+            {/* Hero Section */}
+            <div className="books-hero">
+                <Iridescence color={[0.5, 0.6, 0.8]} mouseReact={false} amplitude={0.1} speed={1} />
+                <div className="hero-content-wrapper">
+                    <div className="hero-content">
+                        <h1 className="hero-title">
+                            Библиотека<br />
+                            Пионеров
+                        </h1>
+                        <p className="hero-subtitle">
+                            Более 1000 книг для вожатых, педагогов<br />
+                            и активистов детского движения
+                        </p>
+                    </div>
 
-                {/* Premium Search & Filters */}
+                    <div className="hero-image">
+                        <div className="hero-illustration-books">
+                            <div className="book-icon-wrapper">
+                                <HiBookOpen className="main-book-icon" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Books Content Section */}
+            <div className="books-content-section">
                 <div className="books-controls">
-                    <SearchFilters
-                        filters={filters}
-                        onFilterChange={setFilters}
-                    />
+                    <SearchFilters onFilterChange={setFilters} />
                 </div>
 
-                {/* Loading State */}
-                {loading && (
+                {loading ? (
                     <div className="books-loading">
                         <div className="loading-spinner"></div>
                         <p className="loading-text">Загружаем книги...</p>
                     </div>
-                )}
-
-                {/* Books Grid - БЕЗ results-info */}
-                {!loading && books.length > 0 && (
+                ) : books.length > 0 ? (
                     <div className="books-grid">
                         {books.map((book, index) => (
                             <div
@@ -93,22 +104,13 @@ const BooksPage = () => {
                             </div>
                         ))}
                     </div>
-                )}
-
-                {/* Premium Empty State */}
-                {!loading && books.length === 0 && (
+                ) : (
                     <div className="books-empty">
                         <div className="books-empty-icon">📚</div>
                         <h2 className="books-empty-title">Книги не найдены</h2>
                         <p className="books-empty-text">
                             Попробуйте изменить параметры поиска или очистить фильтры
                         </p>
-                        <button
-                            className="books-empty-button"
-                            onClick={() => setFilters({})}
-                        >
-                            Сбросить все фильтры
-                        </button>
                     </div>
                 )}
             </div>

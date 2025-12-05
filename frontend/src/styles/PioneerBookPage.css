@@ -1,10 +1,12 @@
 /* ==================== PIONEER BOOK PAGE ==================== */
+
 .pioneer-book-page {
     width: 100%;
     overflow: hidden;
 }
 
 /* ==================== HERO SECTION ==================== */
+
 .pioneer-book-hero {
     position: relative;
     display: flex;
@@ -53,9 +55,10 @@
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* ==================== HERO ILLUSTRATION ==================== */
+/* ==================== HERO ILLUSTRATION - ICON ==================== */
+
 .hero-image {
-    flex: 0 0 350px;
+    flex: 0 0 500px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -63,7 +66,7 @@
     height: 500px;
 }
 
-.hero-illustration-book {
+.hero-illustration {
     position: relative;
     width: 100%;
     height: 100%;
@@ -72,92 +75,53 @@
     align-items: center;
 }
 
-.book-3d {
+.icon-wrapper {
     position: relative;
-    width: 250px;
-    height: 350px;
-    transform-style: preserve-3d;
-    animation: bookRotate 8s ease-in-out infinite;
+    animation: iconFloat 6s ease-in-out infinite;
 }
 
-@keyframes bookRotate {
+@keyframes iconFloat {
 
     0%,
     100% {
-        transform: rotateY(-15deg) rotateX(5deg);
+        transform: translateY(0);
     }
 
     50% {
-        transform: rotateY(15deg) rotateX(-5deg);
+        transform: translateY(-30px);
     }
 }
 
-.book-cover {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 12px;
-    box-shadow:
-        0 20px 60px rgba(102, 126, 234, 0.4),
-        0 0 0 3px rgba(255, 255, 255, 0.2) inset;
-    transform: translateZ(20px);
+.main-icon {
+    width: 380px;
+    height: 380px;
+    color: rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4));
+    animation: iconPulse 3s ease-in-out infinite;
+    transition: all 0.6s ease;
 }
 
-.book-spine {
-    position: absolute;
-    left: 0;
-    width: 40px;
-    height: 100%;
-    background: linear-gradient(90deg, #5a67d8, #667eea);
-    transform-origin: left;
-    transform: rotateY(-90deg);
-    border-radius: 12px 0 0 12px;
-}
-
-.book-pages {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #f3f4f6, #e5e7eb);
-    transform: translateZ(-20px);
-    border-radius: 12px;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
-}
-
-.floating-element {
-    position: absolute;
-    font-size: 2.5rem;
-    opacity: 0.8;
-    animation: elementFloat 4s ease-in-out infinite;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
-}
-
-.element-1 {
-    top: 20%;
-    left: 10%;
-    animation-delay: 0s;
-}
-
-.element-2 {
-    bottom: 20%;
-    right: 10%;
-    animation-delay: 1s;
-}
-
-@keyframes elementFloat {
+@keyframes iconPulse {
 
     0%,
     100% {
-        transform: translateY(0) rotate(0deg);
+        transform: scale(1);
+        filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4));
     }
 
     50% {
-        transform: translateY(-30px) rotate(10deg);
+        transform: scale(1.05);
+        filter: drop-shadow(0 35px 70px rgba(102, 126, 234, 0.6));
     }
+}
+
+.main-icon:hover {
+    transform: scale(1.1) !important;
+    filter: drop-shadow(0 40px 80px rgba(102, 126, 234, 0.8)) !important;
 }
 
 /* ==================== BOOK INFO SECTION ==================== */
+
 .book-info-section {
     padding: var(--spacing-2xl) var(--spacing-md);
     max-width: 1200px;
@@ -206,6 +170,7 @@
 }
 
 /* ==================== TABLE OF CONTENTS ==================== */
+
 .table-of-contents-section {
     padding: var(--spacing-2xl) var(--spacing-md);
     max-width: 1400px;
@@ -258,6 +223,7 @@
 }
 
 /* ==================== ANIMATIONS ==================== */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -283,6 +249,18 @@
 }
 
 /* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 1024px) {
+    .hero-image {
+        flex: 0 0 400px;
+    }
+
+    .main-icon {
+        width: 320px;
+        height: 320px;
+    }
+}
+
 @media (max-width: 768px) {
     .pioneer-book-hero {
         min-height: auto;
@@ -300,11 +278,11 @@
 
     .hero-image {
         flex: 0 0 auto;
-        height: 350px;
+        height: 400px;
     }
 
-    .book-3d {
-        width: 200px;
+    .main-icon {
+        width: 280px;
         height: 280px;
     }
 

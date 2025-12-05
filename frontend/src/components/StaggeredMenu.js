@@ -350,7 +350,7 @@ export const StaggeredMenu = ({
 
                             <div className="sm-actions">
                                 <button className="sm-theme-btn" onClick={toggleTheme}>
-                                    <span className="sm-theme-icon">{theme === 'light' ? '🌙' : '☀️'}</span>
+                                    <span className="sm-theme-icon">{theme === 'light' ? '' : ''}</span>
                                     <span className="sm-theme-text">{theme === 'light' ? 'Темная тема' : 'Светлая тема'}</span>
                                 </button>
 

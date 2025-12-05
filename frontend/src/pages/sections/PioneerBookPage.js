@@ -1,5 +1,6 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { GiNotebook } from 'react-icons/gi';
 import '../../styles/PioneerBookPage.css';
 
 const PioneerBookPage = () => {
@@ -36,14 +37,10 @@ const PioneerBookPage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-book">
-                            <div className="book-3d">
-                                <div className="book-cover"></div>
-                                <div className="book-spine"></div>
-                                <div className="book-pages"></div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <GiNotebook className="main-icon" />
                             </div>
-                            <div className="floating-element element-1">📖</div>
-                            <div className="floating-element element-2">⭐</div>
                         </div>
                     </div>
                 </div>

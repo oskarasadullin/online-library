@@ -1,5 +1,6 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { MdGroups } from 'react-icons/md';
 import '../../styles/SchoolLeadersPage.css';
 
 const SchoolLeadersPage = () => {
@@ -27,20 +28,10 @@ const SchoolLeadersPage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-leaders">
-                            <div className="leaders-table">
-                                <div className="table-top"></div>
-                                <div className="table-legs"></div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <MdGroups className="main-icon" />
                             </div>
-                            <div className="leader-character leader-1">
-                                <div className="character-icon">👤</div>
-                            </div>
-                            <div className="leader-character leader-2">
-                                <div className="character-icon">👤</div>
-                            </div>
-                            <div className="floating-element element-1">📋</div>
-                            <div className="floating-element element-2">✏️</div>
-                            <div className="floating-element element-3">📚</div>
                         </div>
                     </div>
                 </div>

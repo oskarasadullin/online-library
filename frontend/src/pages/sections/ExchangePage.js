@@ -1,5 +1,6 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { IoSwapHorizontal } from 'react-icons/io5';
 import '../../styles/ExchangePage.css';
 
 const ExchangePage = () => {
@@ -45,19 +46,10 @@ const ExchangePage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-exchange">
-                            <div className="team-group">
-                                <div className="team-member member-1">👤</div>
-                                <div className="team-member member-2">👤</div>
-                                <div className="team-member member-3">👤</div>
-                                <div className="team-member member-4">👤</div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <IoSwapHorizontal className="main-icon" />
                             </div>
-                            <div className="presentation-screen">
-                                <div className="screen-content">💻</div>
-                            </div>
-                            <div className="presenter">👤</div>
-                            <div className="floating-element element-1">💡</div>
-                            <div className="floating-element element-2">❗</div>
                         </div>
                     </div>
                 </div>

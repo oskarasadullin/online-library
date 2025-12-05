@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Iridescence from '../../components/Iridescence';
+import { GiPodiumWinner } from 'react-icons/gi';
 import '../../styles/PioneersWorkPage.css';
 
 const PioneersWorkPage = () => {
@@ -73,15 +74,9 @@ const PioneersWorkPage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-pioneers">
-                            <div className="books-stack">
-                                <div className="book book-1"></div>
-                                <div className="book book-2"></div>
-                                <div className="book book-3"></div>
-                                <div className="book book-4"></div>
-                            </div>
-                            <div className="pioneer-character">
-                                <div className="character-body"></div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <GiPodiumWinner className="main-icon" />
                             </div>
                         </div>
                     </div>

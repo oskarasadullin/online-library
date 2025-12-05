@@ -1,5 +1,6 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { MdTheaters } from 'react-icons/md';
 import '../../styles/ScenariosPage.css';
 
 const ScenariosPage = () => {
@@ -28,17 +29,10 @@ const ScenariosPage = () => {
                     </div>
 
                     <div className="hero-image">
-                        <div className="hero-illustration-scenarios">
-                            <div className="theater-stage">
-                                <div className="stage-curtain left"></div>
-                                <div className="stage-curtain right"></div>
-                                <div className="stage-performers">
-                                    <div className="performer performer-1">🐰</div>
-                                    <div className="performer performer-2">🐰</div>
-                                </div>
+                        <div className="hero-illustration">
+                            <div className="icon-wrapper">
+                                <MdTheaters className="main-icon" />
                             </div>
-                            <div className="audience audience-left">👤</div>
-                            <div className="audience audience-right">👤</div>
                         </div>
                     </div>
                 </div>

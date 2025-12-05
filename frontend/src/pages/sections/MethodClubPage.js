@@ -1,5 +1,6 @@
 import React from 'react';
 import Iridescence from '../../components/Iridescence';
+import { GiSoundWaves } from 'react-icons/gi';
 import '../../styles/MethodClubPage.css';
 
 const MethodClubPage = () => {
@@ -7,17 +8,12 @@ const MethodClubPage = () => {
         <div className="method-club-page">
             {/* Hero Section */}
             <div className="method-club-hero">
-                <Iridescence
-                    color={[0.5, 0.6, 0.8]}
-                    mouseReact={false}
-                    amplitude={0.1}
-                    speed={1}
-                />
-
+                <Iridescence color={[0.5, 0.6, 0.8]} mouseReact={false} amplitude={0.1} speed={1} />
                 <div className="hero-content-wrapper">
                     <div className="hero-content">
                         <h1 className="hero-title">
-                            Методический<br />клуб
+                            Методический<br />
+                            клуб
                         </h1>
                         <p className="hero-subtitle">
                             Эфиры, подкасты, подборки советов и курсы<br />
@@ -27,40 +23,21 @@ const MethodClubPage = () => {
 
                     <div className="hero-image">
                         <div className="hero-illustration">
-                            <div className="illustration-phone">
-                                <div className="phone-screen">
-                                    <div className="screen-content">
-                                        <div className="profile-item"></div>
-                                        <div className="profile-item"></div>
-                                        <div className="profile-item"></div>
-                                        <div className="profile-item"></div>
-                                    </div>
-                                </div>
+                            <div className="soundwave-icon-wrapper">
+                                <GiSoundWaves className="main-soundwave-icon" />
                             </div>
-                            <div className="floating-element element-1">💡</div>
-                            <div className="floating-element element-2">📚</div>
-                            <div className="floating-element element-3">🎯</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Materials Section */}
-            <div className="method-club-materials">
-                <h2 className="materials-title">Материалы клуба</h2>
-                <div className="materials-content">
-                    <div className="materials-grid">
-                        {[1, 2, 3, 4, 5, 6].map((item) => (
-                            <div key={item} className="material-card">
-                                <div className="card-image-placeholder"></div>
-                                <div className="card-content">
-                                    <div className="card-category">Категория</div>
-                                    <div className="card-title-placeholder"></div>
-                                    <div className="card-text-placeholder"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+            {/* Method Club Content Section */}
+            <div className="method-club-content-section">
+                <div className="content-container">
+                    <h2 className="section-title">Скоро здесь появится контент</h2>
+                    <p className="section-description">
+                        Мы работаем над наполнением этого раздела полезными материалами
+                    </p>
                 </div>
             </div>
         </div>

@@ -234,7 +234,7 @@ html {
     font-weight: 600;
     font-family: inherit;
     text-decoration: none;
-    color: rgba(255, 255, 255, 1);
+    color: #ffffff !important;
     background: rgba(255, 255, 255, 0.15);
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: var(--radius-button);

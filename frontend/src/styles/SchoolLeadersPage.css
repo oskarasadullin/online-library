@@ -1,10 +1,12 @@
 /* ==================== SCHOOL LEADERS PAGE - APPLE PRO STYLE ==================== */
+
 .school-leaders-page {
     width: 100%;
     overflow: hidden;
 }
 
 /* ==================== HERO SECTION ==================== */
+
 .school-leaders-hero {
     position: relative;
     display: flex;
@@ -14,65 +16,7 @@
     padding: var(--spacing-3xl) var(--spacing-md);
     margin-bottom: var(--spacing-2xl);
     overflow: hidden;
-    background: var(--gradient-primary);
-}
-
-.hero-background {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-}
-
-.hero-gradient {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 20%,
-            rgba(255, 255, 255, 0.15) 0%,
-            rgba(255, 255, 255, 0.05) 50%,
-            transparent 70%);
-    animation: gradientShift 8s ease-in-out infinite;
-}
-
-.hero-blur {
-    position: absolute;
-    top: 10%;
-    right: 10%;
-    width: 400px;
-    height: 400px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    filter: blur(80px);
-    animation: float 20s ease-in-out infinite;
-}
-
-@keyframes gradientShift {
-
-    0%,
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.8;
-        transform: scale(1.1);
-    }
-}
-
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translate(0, 0);
-    }
-
-    33% {
-        transform: translate(30px, -30px);
-    }
-
-    66% {
-        transform: translate(-20px, 20px);
-    }
+    background: transparent;
 }
 
 .hero-content-wrapper {
@@ -111,9 +55,10 @@
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Hero Illustration - Leaders at Table */
+/* Hero Illustration - Icon */
+
 .hero-image {
-    flex: 0 0 450px;
+    flex: 0 0 500px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -121,7 +66,7 @@
     height: 500px;
 }
 
-.hero-illustration-leaders {
+.hero-illustration {
     position: relative;
     width: 100%;
     height: 100%;
@@ -130,14 +75,12 @@
     align-items: center;
 }
 
-.leaders-table {
+.icon-wrapper {
     position: relative;
-    width: 280px;
-    height: 160px;
-    animation: tableFloat 6s ease-in-out infinite;
+    animation: iconFloat 6s ease-in-out infinite;
 }
 
-@keyframes tableFloat {
+@keyframes iconFloat {
 
     0%,
     100% {
@@ -145,146 +88,40 @@
     }
 
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-30px);
     }
 }
 
-.table-top {
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    height: 20px;
-    background: linear-gradient(135deg, #00e965, #00a049);
-    border-radius: 12px;
-    box-shadow: var(--shadow-lg);
+.main-icon {
+    width: 380px;
+    height: 380px;
+    color: rgba(255, 255, 255, 0.95);
+    filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4));
+    animation: iconPulse 3s ease-in-out infinite;
+    transition: all 0.6s ease;
 }
 
-.table-legs {
-    position: absolute;
-    top: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    height: 80px;
-    background: transparent;
-}
-
-.table-legs::before,
-.table-legs::after {
-    content: '';
-    position: absolute;
-    width: 15px;
-    height: 100%;
-    background: linear-gradient(135deg, #00a049, #00763a);
-    border-radius: 8px;
-}
-
-.table-legs::before {
-    left: 20px;
-}
-
-.table-legs::after {
-    right: 20px;
-}
-
-.leader-character {
-    position: absolute;
-    width: 100px;
-    height: 120px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 50px 50px 20px 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.leader-1 {
-    top: 20%;
-    left: 10%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    animation: leader1Float 6s ease-in-out infinite;
-}
-
-.leader-2 {
-    top: 20%;
-    right: 10%;
-    background: linear-gradient(135deg, #f093fb, #f5576c);
-    animation: leader2Float 6s ease-in-out infinite 0.3s;
-}
-
-@keyframes leader1Float {
+@keyframes iconPulse {
 
     0%,
     100% {
-        transform: translateY(0) rotate(-5deg);
+        transform: scale(1);
+        filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.4));
     }
 
     50% {
-        transform: translateY(-15px) rotate(-3deg);
+        transform: scale(1.05);
+        filter: drop-shadow(0 35px 70px rgba(102, 126, 234, 0.6));
     }
 }
 
-@keyframes leader2Float {
-
-    0%,
-    100% {
-        transform: translateY(0) rotate(5deg);
-    }
-
-    50% {
-        transform: translateY(-15px) rotate(3deg);
-    }
-}
-
-.character-icon {
-    font-size: 48px;
-    margin-top: -10px;
-}
-
-.floating-element {
-    position: absolute;
-    font-size: 2.5rem;
-    opacity: 0.8;
-    animation: elementFloat 4s ease-in-out infinite;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
-}
-
-.element-1 {
-    top: 15%;
-    left: 5%;
-    animation-delay: 0s;
-}
-
-.element-2 {
-    bottom: 20%;
-    left: 0;
-    animation-delay: 1s;
-}
-
-.element-3 {
-    top: 50%;
-    right: 0;
-    animation-delay: 2s;
-}
-
-@keyframes elementFloat {
-
-    0%,
-    100% {
-        transform: translateY(0) rotate(0deg);
-    }
-
-    50% {
-        transform: translateY(-30px) rotate(10deg);
-    }
+.main-icon:hover {
+    transform: scale(1.1) !important;
+    filter: drop-shadow(0 40px 80px rgba(102, 126, 234, 0.8)) !important;
 }
 
 /* ==================== CONTENT SECTION ==================== */
+
 .leaders-content-section {
     padding: var(--spacing-2xl) var(--spacing-md);
     max-width: 1400px;
@@ -322,6 +159,7 @@
 }
 
 /* ==================== ANIMATIONS ==================== */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -355,13 +193,19 @@
 }
 
 /* ==================== RESPONSIVE ==================== */
+
 @media (max-width: 1024px) {
     .hero-content-wrapper {
         gap: var(--spacing-lg);
     }
 
     .hero-image {
-        flex: 0 0 350px;
+        flex: 0 0 400px;
+    }
+
+    .main-icon {
+        width: 320px;
+        height: 320px;
     }
 }
 
@@ -381,25 +225,14 @@
         height: 400px;
     }
 
-    .leaders-table {
-        width: 220px;
-    }
-
-    .leader-character {
-        width: 80px;
-        height: 100px;
-    }
-
-    .character-icon {
-        font-size: 36px;
-    }
-
-    .floating-element {
-        font-size: 2rem;
+    .main-icon {
+        width: 280px;
+        height: 280px;
     }
 }
 
 /* ==================== ACCESSIBILITY ==================== */
+
 @media (prefers-reduced-motion: reduce) {
 
     *,

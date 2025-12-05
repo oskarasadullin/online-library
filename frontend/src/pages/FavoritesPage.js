@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Iridescence from '../components/Iridescence';
 import BookCard from '../components/BookCard';
 import { favoritesAPI } from '../services/api';
+import { FaHeart, FaHeartBroken } from 'react-icons/fa';
 import '../styles/FavoritesPage.css';
 
 const FavoritesPage = () => {
@@ -35,43 +37,51 @@ const FavoritesPage = () => {
 
     return (
         <div className="favorites-page">
-            <div className="favorites-container">
-                {/* Header */}
-                <header className="page-header">
-                    <h1>Избранное</h1>
-                    <p className="page-subtitle">
-                        Ваша персональная коллекция любимых книг
-                    </p>
-                </header>
+            {/* Hero Section */}
+            <div className="favorites-hero">
+                <Iridescence color={[0.5, 0.6, 0.8]} mouseReact={false} amplitude={0.1} speed={1} />
+                <div className="hero-content-wrapper">
+                    <div className="hero-content">
+                        <h1 className="hero-title">
+                            Избранные<br />
+                            книги
+                        </h1>
+                        <p className="hero-subtitle">
+                            Ваша личная коллекция избранных материалов<br />
+                            для быстрого доступа
+                        </p>
+                    </div>
 
-                {/* Loading State */}
-                {loading && (
+                    <div className="hero-image">
+                        <div className="hero-illustration">
+                            <div className="heart-icon-wrapper">
+                                <FaHeart className="main-heart-icon" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Favorites Content Section */}
+            <div className="favorites-content-section">
+                {loading ? (
                     <div className="favorites-loading">
                         <div className="loading-spinner"></div>
                         <p className="loading-text">Загружаем избранные книги...</p>
                     </div>
-                )}
-
-                {/* Books Grid */}
-                {!loading && books.length > 0 && (
+                ) : books.length > 0 ? (
                     <div className="favorites-grid">
-                        {books.map((book) => (
-                            <BookCard
-                                key={book.id}
-                                book={book}
-                                onUpdate={loadFavorites}
-                            />
+                        {books.map(book => (
+                            <BookCard key={book.id} book={book} />
                         ))}
                     </div>
-                )}
-
-                {/* Empty State */}
-                {!loading && books.length === 0 && (
+                ) : (
                     <div className="favorites-empty">
-                        <div className="favorites-empty-icon">📚</div>
-                        <h2 className="favorites-empty-title">Пока пусто</h2>
+                        <FaHeartBroken className="favorites-empty-icon" />
+                        <h2 className="favorites-empty-title">Здесь пока пусто</h2>
                         <p className="favorites-empty-text">
-                            Вы еще не добавили книги в избранное. Начните с изучения каталога!
+                            Вы еще не добавили книги в избранное.<br />
+                            Начните с изучения каталога!
                         </p>
                         <Link to="/books" className="favorites-empty-button">
                             Перейти к книгам

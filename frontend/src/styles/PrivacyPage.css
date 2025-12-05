@@ -2,14 +2,14 @@
 .privacy-page {
     width: 100%;
     min-height: 100vh;
-    padding: 80px 24px;
+    padding: 40px 24px 80px;
     background: var(--background);
     transition: background 0.3s ease;
 }
 
 .privacy-container {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 100px auto 0;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -92,42 +92,44 @@
 }
 
 /* ==================== DARK THEME ==================== */
-.dark .privacy-page {
-    background: #0a0a0a;
+[data-theme="dark"] .privacy-page {
+    background: #000000;
 }
 
-.dark .privacy-container {
-    background: #2a2a2a;
-    border-color: #404040;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+[data-theme="dark"] .privacy-container {
+    background-color: #2c2c2e !important;
+    background: #2c2c2e !important;
+    border-color: #404040 !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
-.dark .privacy-title,
-.dark .privacy-section h2,
-.dark .privacy-section strong {
+[data-theme="dark"] .privacy-title,
+[data-theme="dark"] .privacy-section h2,
+[data-theme="dark"] .privacy-section strong {
     color: #ffffff;
 }
 
-.dark .privacy-section p,
-.dark .privacy-section ul li {
+[data-theme="dark"] .privacy-section p,
+[data-theme="dark"] .privacy-section ul li {
     color: #d0d0d0;
 }
 
-.dark .privacy-section a {
+[data-theme="dark"] .privacy-section a {
     color: #a98fff;
 }
 
-.dark .privacy-section a:hover {
+[data-theme="dark"] .privacy-section a:hover {
     color: #c4b0ff;
 }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
     .privacy-page {
-        padding: 48px 24px;
+        padding: 32px 24px 48px;
     }
 
     .privacy-container {
+        margin-top: 80px;
         padding: 32px 24px;
     }
 
@@ -148,10 +150,11 @@
 
 @media (max-width: 480px) {
     .privacy-page {
-        padding: 32px 16px;
+        padding: 24px 16px 32px;
     }
 
     .privacy-container {
+        margin-top: 70px;
         padding: 24px 16px;
         border-radius: 12px;
     }

@@ -125,7 +125,7 @@
     width: 100%;
     min-height: 100vh;
     background-color: var(--bd-bg);
-    padding: 40px 20px;
+    padding: 200px 40px 20px;
     font-family: var(--bd-font);
     animation: fadeIn var(--bd-speed) var(--bd-transition);
 }
