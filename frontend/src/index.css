@@ -1,95 +1,742 @@
-* {
+/* ═══════════════════════════════════════════════════════════
+   PIONEERS LIBRARY — PREMIUM DESIGN SYSTEM v2.0
+   Ultra-Modern Apple-Inspired Interface
+   ═══════════════════════════════════════════════════════════ */
+
+/* ━━━ RESET & BASE ━━━ */
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+        "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-x: hidden;
+}
+
+/* ━━━ CSS VARIABLES — DESIGN TOKENS ━━━ */
 :root {
-    --primary-green: #00e965;
-    --primary-blue: #006edc;
+    /* ─── Brand Colors ─── */
+    --primary-gradient-from: #667eea;
+    --primary-gradient-to: #764ba2;
+    --accent-green: #00e965;
+    --accent-blue: #006edc;
+
+    /* ─── Extended Palette ─── */
+    --purple-50: #f5f3ff;
+    --purple-100: #ede9fe;
+    --purple-500: #667eea;
+    --purple-600: #764ba2;
+    --purple-700: #5b21b6;
+
+    --green-50: #ecfdf5;
+    --green-100: #d1fae5;
+    --green-500: #00e965;
+    --green-600: #00c853;
+
+    --blue-500: #006edc;
+    --blue-600: #0055aa;
+
+    --red-500: #ff4444;
+    --red-600: #cc3333;
+
+    /* ─── Gradients ─── */
+    --gradient-primary: linear-gradient(135deg, var(--primary-gradient-from) 0%, var(--primary-gradient-to) 100%);
+    --gradient-accent: linear-gradient(135deg, #00e965 0%, #00c853 100%);
+    --gradient-warm: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+    --gradient-cool: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-sunset: linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%);
+    --gradient-aurora: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+
+    /* ─── Spacing Scale ─── */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 64px;
+    --spacing-4xl: 96px;
+
+    /* ─── Border Radius ─── */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    /* ─── Typography ─── */
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    --font-text: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    --font-mono: "SF Mono", "Monaco", "Consolas", monospace;
+
+    /* ─── Font Sizes ─── */
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 18px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+    --text-3xl: 30px;
+    --text-4xl: 36px;
+    --text-5xl: 48px;
+    --text-6xl: 60px;
+    --text-7xl: 72px;
+
+    /* ─── Font Weights ─── */
+    --font-light: 300;
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-black: 900;
+
+    /* ─── Transitions ─── */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 400ms cubic-bezier(0.28, 0.11, 0.32, 1);
+    --transition-slow: 600ms cubic-bezier(0.28, 0.11, 0.32, 1);
+
+    /* ─── Z-Index Scale ─── */
+    --z-base: 1;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
+    --z-toast: 800;
+
+    /* ─── Animation Durations ─── */
+    --anim-fast: 200ms;
+    --anim-base: 300ms;
+    --anim-slow: 500ms;
+    --anim-slower: 800ms;
+}
+
+/* ━━━ LIGHT THEME (DEFAULT) ━━━ */
+:root,
+[data-theme="light"] {
+    /* ─── Backgrounds ─── */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f7;
+    --bg-tertiary: #ebebed;
+    --bg-elevated: #ffffff;
+
+    /* ─── Text Colors ─── */
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #86868b;
+    --text-inverse: #ffffff;
+
+    /* ─── Borders ─── */
+    --border-light: rgba(0, 0, 0, 0.08);
+    --border-base: rgba(0, 0, 0, 0.12);
+    --border-strong: rgba(0, 0, 0, 0.2);
+
+    /* ─── Surfaces ─── */
+    --surface-base: #ffffff;
+    --surface-elevated: #ffffff;
+    --surface-hover: rgba(0, 0, 0, 0.04);
+    --surface-active: rgba(0, 0, 0, 0.08);
+
+    /* ─── Glassmorphism ─── */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-blur: saturate(180%) blur(20px);
+
+    /* ─── Shadows ─── */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.10);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.14);
+    --shadow-2xl: 0 20px 64px rgba(0, 0, 0, 0.16);
+
+    /* ─── Colored Shadows (for accents) ─── */
+    --shadow-primary: 0 8px 24px rgba(102, 126, 234, 0.25);
+    --shadow-accent: 0 8px 24px rgba(0, 233, 101, 0.25);
+
+    /* ─── Overlays ─── */
+    --overlay-light: rgba(0, 0, 0, 0.3);
+    --overlay-medium: rgba(0, 0, 0, 0.5);
+    --overlay-dark: rgba(0, 0, 0, 0.7);
+}
+
+/* ━━━ DARK THEME ━━━ */
+[data-theme="dark"] {
+    /* ─── Backgrounds ─── */
+    --bg-primary: #000000;
+    --bg-secondary: #1c1c1e;
+    --bg-tertiary: #2c2c2e;
+    --bg-elevated: #1c1c1e;
+
+    /* ─── Text Colors ─── */
+    --text-primary: #f5f5f7;
+    --text-secondary: #98989d;
+    --text-tertiary: #636366;
+    --text-inverse: #1d1d1f;
+
+    /* ─── Borders ─── */
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-base: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.2);
+
+    /* ─── Surfaces ─── */
+    --surface-base: #1c1c1e;
+    --surface-elevated: #2c2c2e;
+    --surface-hover: rgba(255, 255, 255, 0.06);
+    --surface-active: rgba(255, 255, 255, 0.12);
+
+    /* ─── Glassmorphism ─── */
+    --glass-bg: rgba(28, 28, 30, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-blur: saturate(180%) blur(20px);
+
+    /* ─── Shadows ─── */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.6);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.7);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.8);
+    --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.85);
+    --shadow-2xl: 0 20px 64px rgba(0, 0, 0, 0.9);
+
+    --shadow-primary: 0 8px 24px rgba(102, 126, 234, 0.4);
+    --shadow-accent: 0 8px 24px rgba(0, 233, 101, 0.4);
+
+    /* ─── Overlays ─── */
+    --overlay-light: rgba(0, 0, 0, 0.5);
+    --overlay-medium: rgba(0, 0, 0, 0.7);
+    --overlay-dark: rgba(0, 0, 0, 0.85);
+}
+
+/* ━━━ UTILITY CLASSES ━━━ */
+
+/* ─── Backgrounds ─── */
+.bg-gradient-primary {
+    background: var(--gradient-primary);
+}
+
+.bg-gradient-accent {
+    background: var(--gradient-accent);
+}
+
+.bg-glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+}
+
+/* ─── Text Utilities ─── */
+.text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-accent {
+    color: var(--accent-green);
+}
+
+/* ─── Interactive Elements ─── */
+.interactive {
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.interactive:hover {
+    transform: translateY(-2px);
+}
+
+.interactive:active {
+    transform: translateY(0);
+}
+
+/* ─── Cards ─── */
+.card {
+    background: var(--surface-base);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all var(--transition-smooth);
+    box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.card-glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-smooth);
+}
+
+.card-glass:hover {
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+/* ━━━ BUTTONS — PREMIUM STYLES ━━━ */
+button,
+.btn {
+    font-family: var(--font-display);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 14px 32px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.btn-primary:hover {
+    box-shadow: var(--shadow-primary);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn-primary:hover::before {
+    opacity: 1;
+}
+
+.btn-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-secondary {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    padding: 14px 32px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    border: 1px solid var(--border-base);
+}
+
+.btn-secondary:hover {
+    background: var(--surface-active);
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-accent {
+    background: var(--gradient-accent);
+    color: white;
+    padding: 14px 32px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-accent:hover {
+    box-shadow: var(--shadow-accent);
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* ━━━ INPUTS & FORMS ━━━ */
+input,
+textarea,
+select {
+    font-family: var(--font-text);
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    background: var(--surface-base);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    outline: none;
+    transition: all var(--transition-base);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+    border-color: var(--border-strong);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary-gradient-from);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* ━━━ LINKS ━━━ */
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-gradient-from);
+}
+
+/* ━━━ ANIMATIONS ━━━ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Animation utility classes */
+.animate-fadeIn {
+    animation: fadeIn var(--anim-base) ease-out;
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp var(--anim-slow) var(--transition-smooth);
+}
+
+.animate-scaleIn {
+    animation: scaleIn var(--anim-base) var(--transition-smooth);
+}
+
+.animate-slideInLeft {
+    animation: slideInLeft var(--anim-slow) var(--transition-smooth);
+}
+
+.animate-slideInRight {
+    animation: slideInRight var(--anim-slow) var(--transition-smooth);
+}
+
+/* ━━━ LOADING STATES ━━━ */
+.loading,
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--surface-base) 0%,
+            var(--surface-hover) 50%,
+            var(--surface-base) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+}
+
+/* ━━━ UTILITY STATES ━━━ */
+.empty-state,
+.error,
+.loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.error {
+    color: var(--red-500);
+}
+
+/* ━━━ ACCESSIBILITY ━━━ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Focus states */
+*:focus-visible {
+    outline: 2px solid var(--primary-gradient-from);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ━━━ SCROLLBAR STYLING ━━━ */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* ━━━ SELECTION ━━━ */
+::selection {
+    background: rgba(102, 126, 234, 0.3);
+    color: var(--text-primary);
+}
+
+::-moz-selection {
+    background: rgba(102, 126, 234, 0.3);
+    color: var(--text-primary);
+}
+
+/* ━━━ RESPONSIVE BREAKPOINTS ━━━ */
+@media (max-width: 1280px) {
+    :root {
+        --text-7xl: 60px;
+        --text-6xl: 48px;
+        --text-5xl: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --spacing-xl: 24px;
+        --spacing-2xl: 32px;
+        --spacing-3xl: 48px;
+        --text-7xl: 48px;
+        --text-6xl: 40px;
+        --text-5xl: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --spacing-lg: 16px;
+        --spacing-xl: 20px;
+        --spacing-2xl: 28px;
+        --text-7xl: 36px;
+        --text-6xl: 32px;
+        --text-5xl: 28px;
+    }
+}
+
+/* ━━━ MAIN APP CONTAINER ━━━ */
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    width: 100%;
+}
+
+/* ━━━ LEGACY COMPATIBILITY ━━━ */
+/* Сохраняем старые переменные для совместимости */
+:root {
+    --primary-green: var(--accent-green);
+    --primary-blue: var(--accent-blue);
     --white: #ffffff;
     --light-green: #66ffaa;
     --dark-gray: #333333;
     --light-blue: #66b3ff;
-    --transition-speed: 0.2s;
-}
+    --transition-speed: var(--transition-base);
 
-[data-theme="light"] {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --text-primary: #333333;
-    --text-secondary: #666666;
-    --border-color: #e0e0e0;
-    --card-bg: #ffffff;
-    --hover-bg: #f5f5f5;
+    --apple-white: #f5f5f7;
+    --apple-text-primary: var(--text-primary);
+    --apple-text-secondary: var(--text-secondary);
+    --apple-gray-50: #2c2c2e;
+    --apple-gray-100: #f5f5f7;
+
+    --glass-bg: var(--glass-bg);
+    --glass-blur: var(--glass-blur);
+    --glass-border: var(--glass-border);
+    --glass-shadow: var(--shadow-lg);
 }
 
 [data-theme="dark"] {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #2a2a2a;
-    --text-primary: #ffffff;
-    --text-secondary: #cccccc;
-    --border-color: #404040;
-    --card-bg: #2a2a2a;
-    --hover-bg: #3a3a3a;
+    --apple-white: #1d1d1f;
+    --apple-gray-100: #1c1c1e;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
-    line-height: 1.6;
-}
-
+/* ━━━ CODE BLOCKS ━━━ */
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
+    background: var(--surface-hover);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9em;
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
+pre {
+    background: var(--surface-base);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    overflow-x: auto;
 }
 
-button {
-    font-family: inherit;
-    cursor: pointer;
-    border: none;
-    outline: none;
-}
-
-input,
-textarea,
-select {
-    font-family: inherit;
-    outline: none;
-}
-
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
-    font-size: 1.2rem;
-    color: var(--text-secondary);
-}
-
-.error {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
-    font-size: 1.2rem;
-    color: #ff4444;
-}
-
-.empty-state {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
-    font-size: 1.2rem;
-    color: var(--text-secondary);
+pre code {
+    background: none;
+    padding: 0;
 }

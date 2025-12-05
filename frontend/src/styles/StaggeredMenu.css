@@ -688,3 +688,43 @@ body:has(.staggered-menu-wrapper[data-open="true"]) .footer {
     pointer-events: none;
     transition: opacity 0.3s ease;
 }
+
+/* Logo - БЕЗ ИЗМЕНЕНИЯ ЦВЕТА ПРИ HOVER */
+.sm-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    transition: opacity 0.4s var(--sm-transition-smooth), transform 0.4s var(--sm-transition-smooth);
+    font-family: var(--font-display, -apple-system, BlinkMacSystemFont, SF Pro Display, sans-serif);
+    color: var(--apple-text-primary, #1d1d1f) !important;
+}
+
+[data-theme="dark"] .sm-logo {
+    color: #f5f5f7 !important;
+}
+
+.sm-logo:hover {
+    opacity: 0.85;
+    transform: translateX(-3px);
+    color: var(--apple-text-primary, #1d1d1f) !important;
+    /* Явно устанавливаем цвет */
+}
+
+[data-theme="dark"] .sm-logo:hover {
+    color: #f5f5f7 !important;
+    /* Для темной темы */
+}
+
+/* Логотип текст - явно запрещаем изменение цвета */
+.sm-logo-text {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: inherit !important;
+    /* Наследуем цвет от родителя */
+}
+
+.sm-logo-text:hover {
+    color: inherit !important;
+}

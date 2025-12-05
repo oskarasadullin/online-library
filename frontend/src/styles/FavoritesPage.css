@@ -1,11 +1,78 @@
-/* ==================== FAVORITES PAGE ==================== */
+/* ============================================
+   FAVORITES PAGE STYLES - УЛУЧШЕННАЯ ВЕРСИЯ
+   Страница избранных книг с Apple-стилем
+   ============================================ */
+
+/* ============================================
+   CSS VARIABLES
+   ============================================ */
+
+:root {
+    /* Colors */
+    --favorites-primary: #ff1744;
+    --favorites-secondary: #f50057;
+    --favorites-accent: #00e965;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 80px;
+
+    /* Typography */
+    --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+    /* Transitions */
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 24px rgba(255, 23, 68, 0.15);
+    --shadow-lg: 0 16px 48px rgba(255, 23, 68, 0.2);
+    --shadow-xl: 0 24px 60px rgba(255, 23, 68, 0.25);
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --apple-white: #ffffff;
+    --apple-gray-50: #f5f5f7;
+    --apple-text-primary: #1d1d1f;
+    --apple-text-secondary: #6e6e73;
+    --apple-text-tertiary: #86868b;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --apple-white: #f5f5f7;
+    --apple-gray-50: #2c2c2e;
+    --apple-text-primary: #f5f5f7;
+    --apple-text-secondary: #98989d;
+    --apple-text-tertiary: #636366;
+}
+
+/* ============================================
+   PAGE CONTAINER
+   ============================================ */
 
 .favorites-page {
     width: 100%;
+    min-height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
-/* ==================== HERO SECTION ==================== */
+/* ============================================
+   HERO SECTION
+   ============================================ */
 
 .favorites-hero {
     position: relative;
@@ -16,7 +83,34 @@
     padding: var(--spacing-3xl) var(--spacing-md);
     margin-bottom: 0;
     overflow: hidden;
-    background: transparent;
+    background: linear-gradient(135deg, #ff1744 0%, #f50057 100%);
+}
+
+.favorites-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(255, 23, 68, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 70% 50%, rgba(245, 0, 87, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+    animation: heroGradientShift 15s ease infinite;
+}
+
+@keyframes heroGradientShift {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
 }
 
 /* Hero Content */
@@ -35,6 +129,23 @@
 .hero-content {
     flex: 1;
     max-width: 600px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: slideInLeft 0.8s var(--transition-smooth);
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .hero-title {
@@ -42,10 +153,11 @@
     font-size: clamp(48px, 6vw, 80px);
     font-weight: 700;
     margin: 0 0 var(--spacing-md) 0;
-    color: var(--apple-white);
+    color: #ffffff;
     line-height: 1.05;
     letter-spacing: -0.02em;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    text-align: center;
 }
 
 .hero-subtitle {
@@ -55,6 +167,7 @@
     margin: 0;
     font-weight: 400;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
 }
 
 /* Hero Illustration - Heart Icon */
@@ -66,6 +179,19 @@
     align-items: center;
     position: relative;
     height: 500px;
+    animation: slideInRight 0.8s var(--transition-smooth);
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .hero-illustration {
@@ -122,13 +248,15 @@
     filter: drop-shadow(0 40px 80px rgba(255, 20, 100, 0.8)) !important;
 }
 
-/* ==================== FAVORITES CONTENT SECTION ==================== */
+/* ============================================
+   FAVORITES CONTENT SECTION
+   ============================================ */
 
 .favorites-content-section {
     padding: var(--spacing-2xl) var(--spacing-md);
-    max-width: 1400px;
-    margin: 0 auto;
     position: relative;
+    background: var(--apple-gray-50);
+    transition: background 0.3s ease;
 }
 
 .favorites-content-section::before {
@@ -140,7 +268,7 @@
     width: 100%;
     max-width: 1000px;
     height: 400px;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 23, 68, 0.06) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
 }
@@ -151,6 +279,8 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--spacing-lg);
+    max-width: 1400px;
+    margin: 0 auto;
     position: relative;
     z-index: 1;
 }
@@ -159,49 +289,123 @@
 
 .favorites-empty {
     text-align: center;
-    padding: var(--spacing-2xl) var(--spacing-md);
+    padding: var(--spacing-3xl) var(--spacing-md);
     position: relative;
     z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeInUp 0.6s var(--transition-smooth);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .favorites-empty-icon {
     font-size: 80px;
     margin-bottom: var(--spacing-lg);
     opacity: 0.6;
+    color: var(--favorites-primary);
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
 }
 
 .favorites-empty-title {
     font-family: var(--font-display);
     font-size: 32px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--apple-text-primary);
     margin: 0 0 var(--spacing-md);
     transition: color 0.3s ease;
+    letter-spacing: -0.02em;
 }
 
 .favorites-empty-text {
     font-size: 18px;
     color: var(--apple-text-secondary);
     margin: 0 0 var(--spacing-xl);
+    line-height: 1.6;
     transition: color 0.3s ease;
 }
 
 .favorites-empty-button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
     padding: 16px 32px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
+    background: linear-gradient(135deg, #ff1744 0%, #f50057 100%);
+    color: white !important;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 17px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    font-family: var(--font-display);
+    transition: all 0.3s var(--transition-smooth);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.favorites-empty-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.favorites-empty-button:active::before {
+    width: 300px;
+    height: 300px;
 }
 
 .favorites-empty-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+    box-shadow: var(--shadow-lg);
+}
+
+.favorites-empty-button:active {
+    transform: translateY(0);
+}
+
+/* Светлая тема: черный текст при наведении */
+[data-theme="light"] .favorites-empty-button:hover {
+    color: #1d1d1f !important;
+}
+
+/* Темная тема: белый текст всегда */
+[data-theme="dark"] .favorites-empty-button,
+[data-theme="dark"] .favorites-empty-button:hover,
+[data-theme="dark"] .favorites-empty-button:active,
+[data-theme="dark"] .favorites-empty-button:focus {
+    color: #ffffff !important;
 }
 
 /* Loading State */
@@ -211,23 +415,23 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-2xl) var(--spacing-md);
+    padding: var(--spacing-3xl) var(--spacing-md);
     min-height: 400px;
+    gap: var(--spacing-lg);
 }
 
 .loading-spinner {
     width: 52px;
     height: 52px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top-color: #667eea;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--favorites-primary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
-    margin-bottom: var(--spacing-lg);
 }
 
 [data-theme='dark'] .loading-spinner {
     border-color: rgba(255, 255, 255, 0.1);
-    border-top-color: #667eea;
+    border-top-color: var(--favorites-primary);
 }
 
 @keyframes spin {
@@ -240,36 +444,13 @@
     font-size: 17px;
     color: var(--apple-text-secondary);
     font-family: var(--font-display);
+    font-weight: 500;
     transition: color 0.3s ease;
 }
 
-/* ==================== ANIMATIONS ==================== */
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.hero-title {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.1s both;
-}
-
-.hero-subtitle {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.25s both;
-}
-
-.hero-image {
-    animation: fadeInUp 0.8s var(--transition-smooth) 0.4s both;
-}
-
-/* ==================== RESPONSIVE ==================== */
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
 
 @media (max-width: 1024px) {
     .hero-content-wrapper {
@@ -299,21 +480,26 @@
 
     .hero-content-wrapper {
         flex-direction: column;
-        gap: var(--spacing-xl);
+        text-align: center;
+    }
+
+    .hero-content {
         text-align: center;
     }
 
     .hero-title {
         font-size: clamp(36px, 8vw, 48px);
+        text-align: center;
     }
 
     .hero-subtitle {
         font-size: clamp(17px, 3vw, 19px);
+        text-align: center;
     }
 
     .hero-image {
         flex: 0 0 auto;
-        height: 400px;
+        height: 350px;
     }
 
     .main-heart-icon {
@@ -328,9 +514,41 @@
     .favorites-content-section {
         padding: var(--spacing-xl) var(--spacing-md);
     }
+
+    .favorites-empty {
+        padding: var(--spacing-2xl) var(--spacing-md);
+    }
+
+    .favorites-empty-title {
+        font-size: 28px;
+    }
+
+    .favorites-empty-text {
+        font-size: 16px;
+    }
+
+    .favorites-empty-icon {
+        font-size: 64px;
+    }
 }
 
-/* ==================== ACCESSIBILITY ==================== */
+@media (max-width: 480px) {
+    .favorites-content-section {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
+
+    .favorites-empty-title {
+        font-size: 24px;
+    }
+
+    .favorites-empty-text {
+        font-size: 15px;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY & ANIMATIONS
+   ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
 
@@ -341,4 +559,10 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* Focus visible для accessibility */
+.favorites-empty-button:focus-visible {
+    outline: 2px solid var(--favorites-primary);
+    outline-offset: 2px;
 }
