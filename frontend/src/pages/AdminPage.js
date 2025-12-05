@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Iridescence from '../components/Iridescence';
 import { booksAPI } from '../services/api';
 import { FaShieldAlt } from 'react-icons/fa';
+import { FiAlertTriangle, FiUpload, FiRefreshCw } from 'react-icons/fi'; // ✅ НОВОЕ
 import '../styles/AdminPage.css';
 
 const AdminPage = () => {
@@ -24,10 +25,12 @@ const AdminPage = () => {
     // UI state
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
+    const [reportsStats, setReportsStats] = useState({ pending: 0, resolved: 0, total: 0 }); // ✅ НОВОЕ
 
     // Refs
     const uploadCardRef = useRef(null);
     const syncCardRef = useRef(null);
+    const moderationCardRef = useRef(null); // ✅ НОВОЕ
 
     // Redirect если не админ
     useEffect(() => {
@@ -35,6 +38,22 @@ const AdminPage = () => {
             navigate('/');
         }
     }, [isAdmin, navigate]);
+
+    // ✅ НОВОЕ: Загрузка статистики модерации
+    useEffect(() => {
+        if (isAdmin) {
+            loadReportsStats();
+        }
+    }, [isAdmin]);
+
+    const loadReportsStats = async () => {
+        try {
+            const stats = await booksAPI.getReportsStats();
+            setReportsStats(stats);
+        } catch (error) {
+            console.error('Failed to load reports stats:', error);
+        }
+    };
 
     // Intersection Observer
     useEffect(() => {
@@ -51,7 +70,7 @@ const AdminPage = () => {
             });
         }, observerOptions);
 
-        [uploadCardRef, syncCardRef].forEach(ref => {
+        [uploadCardRef, syncCardRef, moderationCardRef].forEach(ref => { // ✅ ДОБАВЛЕНО moderationCardRef
             if (ref.current) {
                 observer.observe(ref.current);
             }
@@ -187,6 +206,51 @@ const AdminPage = () => {
                             <span className="message-text">{message.text}</span>
                         </div>
                     )}
+
+                    {/* ✅ НОВОЕ: Quick Actions Grid */}
+                    <div className="admin-quick-actions">
+                        <div
+                            className="quick-action-card upload-card"
+                            onClick={() => uploadCardRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            <div className="quick-action-icon upload">
+                                <FiUpload />
+                            </div>
+                            <div className="quick-action-content">
+                                <h3>Добавить книгу</h3>
+                                <p>Загрузить новую книгу в библиотеку</p>
+                            </div>
+                        </div>
+
+                        <div
+                            className="quick-action-card moderation-card"
+                            onClick={() => navigate('/admin/moderation')}
+                        >
+                            <div className="quick-action-icon moderation">
+                                <FiAlertTriangle />
+                            </div>
+                            <div className="quick-action-content">
+                                <h3>Модерация отзывов</h3>
+                                <p>Обработка жалоб пользователей</p>
+                            </div>
+                            {reportsStats.pending > 0 && (
+                                <div className="quick-action-badge">{reportsStats.pending}</div>
+                            )}
+                        </div>
+
+                        <div
+                            className="quick-action-card sync-card"
+                            onClick={() => syncCardRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            <div className="quick-action-icon sync">
+                                <FiRefreshCw />
+                            </div>
+                            <div className="quick-action-content">
+                                <h3>Синхронизация</h3>
+                                <p>Обновить данные из файловой системы</p>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Upload Card */}
                     <div ref={uploadCardRef} className="admin-card">

@@ -39,12 +39,16 @@ docker-compose.yml
         index.js
             assets/
             components/
+            AdvancedSearchFilters.js
             Ballpit.js
             BookCard.js
             Footer.js
             Iridescence.js
+            ReportModal.js
             SearchFilters.js
             StaggeredMenu.js
+            Toast.js
+            ToastContainer.js
             contexts/
             AuthContext.js
             ThemeContext.js
@@ -55,7 +59,9 @@ docker-compose.yml
             BooksPage.js
             FavoritesPage.js
             LandingPage.js
+            ModerationPage.js
             PrivacyPage.js
+            ReaderPage.js
                 sections/
                 CalendarPage.js
                 ContactsPage.js
@@ -73,6 +79,7 @@ docker-compose.yml
             api.js
             styles/
             AdminPage.css
+            AdvancedSearchFilters.css
             AuthPage.css
             BookCard.css
             BookDetailPage.css
@@ -87,15 +94,19 @@ docker-compose.yml
             Iridescence.css
             LandingPage.css
             MethodClubPage.css
+            ModerationPage.css css
             PageTemplate.css
             PioneerBookPage.css
             PioneersWorkPage.css
             PrivacyPage.css
+            ReaderPage.css
+            ReportModal.css
             ScenariosPage.css
             SchoolLeadersPage.css
             SchoolMediaPage.css
             SearchFilters.css
             StaggeredMenu.css
+            Toast.css
             VolunteersPage.css
 
 # FILE CONTENTS
@@ -1485,6 +1496,190 @@ def get_user_statistics(db: Session, user_id: int) -> dict:
         "ratings_count": ratings_count or 0
     }
 
+# Добавить в конец файла
+
+# ============ MODERATION OPERATIONS ============
+
+def create_review_report(
+    db: Session,
+    review_id: int,
+    reporter_id: int,
+    reason: str,
+    comment: Optional[str] = None
+) -> models.ReviewReport:
+    """Создать жалобу на отзыв"""
+    # Проверяем, не жаловался ли уже этот пользователь
+    existing = db.query(models.ReviewReport).filter(
+        and_(
+            models.ReviewReport.review_id == review_id,
+            models.ReviewReport.reporter_id == reporter_id
+        )
+    ).first()
+    
+    if existing:
+        return existing
+    
+    report = models.ReviewReport(
+        review_id=review_id,
+        reporter_id=reporter_id,
+        reason=reason,
+        comment=comment
+    )
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
+
+def get_pending_reports(db: Session, skip: int = 0, limit: int = 100) -> List[models.ReviewReport]:
+    """Получить список необработанных жалоб"""
+    return db.query(models.ReviewReport).filter(
+        models.ReviewReport.status == "pending"
+    ).order_by(
+        models.ReviewReport.created_at.desc()
+    ).offset(skip).limit(limit).all()
+
+def get_report_by_id(db: Session, report_id: int) -> Optional[models.ReviewReport]:
+    """Получить жалобу по ID"""
+    return db.query(models.ReviewReport).filter(
+        models.ReviewReport.id == report_id
+    ).first()
+
+def resolve_report(
+    db: Session,
+    report_id: int,
+    admin_id: int,
+    action: str  # dismiss, delete_review
+) -> Optional[models.ReviewReport]:
+    """Обработать жалобу"""
+    report = get_report_by_id(db, report_id)
+    if not report:
+        return None
+    
+    report.status = "resolved" if action == "dismiss" else "resolved"
+    report.resolved_at = datetime.utcnow()
+    report.resolved_by = admin_id
+    
+    # Если нужно удалить отзыв
+    if action == "delete_review":
+        delete_review(db, report.review_id)
+    
+    db.commit()
+    db.refresh(report)
+    return report
+
+def get_reports_count(db: Session) -> dict:
+    """Получить статистику по жалобам"""
+    total = db.query(func.count(models.ReviewReport.id)).scalar()
+    pending = db.query(func.count(models.ReviewReport.id)).filter(
+        models.ReviewReport.status == "pending"
+    ).scalar()
+    resolved = db.query(func.count(models.ReviewReport.id)).filter(
+        models.ReviewReport.status == "resolved"
+    ).scalar()
+    
+    return {
+        "total": total or 0,
+        "pending": pending or 0,
+        "resolved": resolved or 0
+    }
+
+# ============ BOOKMARKS OPERATIONS ============
+
+def get_user_bookmarks(db: Session, user_id: int, book_id: int) -> List[models.Bookmark]:
+    """Получить закладки пользователя для книги"""
+    return db.query(models.Bookmark).filter(
+        and_(
+            models.Bookmark.user_id == user_id,
+            models.Bookmark.book_id == book_id
+        )
+    ).order_by(models.Bookmark.page).all()
+
+def add_bookmark(db: Session, user_id: int, book_id: int, page: int) -> models.Bookmark:
+    """Добавить закладку"""
+    # Проверяем, не существует ли уже
+    existing = db.query(models.Bookmark).filter(
+        and_(
+            models.Bookmark.user_id == user_id,
+            models.Bookmark.book_id == book_id,
+            models.Bookmark.page == page
+        )
+    ).first()
+    
+    if existing:
+        return existing
+    
+    bookmark = models.Bookmark(user_id=user_id, book_id=book_id, page=page)
+    db.add(bookmark)
+    db.commit()
+    db.refresh(bookmark)
+    return bookmark
+
+def remove_bookmark(db: Session, user_id: int, book_id: int, page: int) -> bool:
+    """Удалить закладку"""
+    bookmark = db.query(models.Bookmark).filter(
+        and_(
+            models.Bookmark.user_id == user_id,
+            models.Bookmark.book_id == book_id,
+            models.Bookmark.page == page
+        )
+    ).first()
+    
+    if bookmark:
+        db.delete(bookmark)
+        db.commit()
+        return True
+    return False
+
+# ============ NOTES OPERATIONS ============
+
+def get_user_notes(db: Session, user_id: int, book_id: int) -> List[models.Note]:
+    """Получить заметки пользователя для книги"""
+    return db.query(models.Note).filter(
+        and_(
+            models.Note.user_id == user_id,
+            models.Note.book_id == book_id
+        )
+    ).order_by(models.Note.page).all()
+
+def create_note(
+    db: Session,
+    user_id: int,
+    book_id: int,
+    page: int,
+    text: str
+) -> models.Note:
+    """Создать заметку"""
+    note = models.Note(user_id=user_id, book_id=book_id, page=page, text=text)
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return note
+
+def update_note(db: Session, note_id: int, text: str) -> Optional[models.Note]:
+    """Обновить заметку"""
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if note:
+        note.text = text
+        note.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(note)
+    return note
+
+def delete_note(db: Session, note_id: int, user_id: int) -> bool:
+    """Удалить заметку"""
+    note = db.query(models.Note).filter(
+        and_(
+            models.Note.id == note_id,
+            models.Note.user_id == user_id
+        )
+    ).first()
+    
+    if note:
+        db.delete(note)
+        db.commit()
+        return True
+    return False
+
 
 ==== FILE: backend\app\database.py ====
 from sqlalchemy import create_engine
@@ -2070,6 +2265,216 @@ def health_check():
     """Проверка здоровья API"""
     return {"status": "ok", "message": "API работает"}
 
+# Добавить после раздела REVIEWS ENDPOINTS
+
+# ============ MODERATION ENDPOINTS ============
+
+@app.post("/api/reports", response_model=schemas.ReviewReportResponse, status_code=status.HTTP_201_CREATED)
+def create_report(
+    report: schemas.ReviewReportCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Пожаловаться на отзыв"""
+    # Проверяем существование отзыва
+    review = crud.get_review(db, report.review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Отзыв не найден")
+    
+    # Нельзя жаловаться на свой отзыв
+    if review.user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Нельзя жаловаться на свой отзыв")
+    
+    db_report = crud.create_review_report(
+        db, report.review_id, current_user.id, report.reason, report.comment
+    )
+    
+    return schemas.ReviewReportResponse(
+        id=db_report.id,
+        review_id=db_report.review_id,
+        reporter_id=db_report.reporter_id,
+        reason=db_report.reason,
+        comment=db_report.comment,
+        status=db_report.status,
+        created_at=db_report.created_at,
+        resolved_at=db_report.resolved_at,
+        resolved_by=db_report.resolved_by,
+        review=schemas.ReviewResponse(
+            id=review.id,
+            user_id=review.user_id,
+            book_id=review.book_id,
+            text=review.text,
+            created_at=review.created_at,
+            user_name=review.user.full_name
+        ),
+        reporter_name=current_user.full_name
+    )
+
+@app.get("/api/admin/reports", response_model=List[schemas.ReviewReportResponse])
+def get_reports(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """Получить список жалоб (только для админов)"""
+    reports = crud.get_pending_reports(db, skip, limit)
+    
+    result = []
+    for report in reports:
+        result.append(schemas.ReviewReportResponse(
+            id=report.id,
+            review_id=report.review_id,
+            reporter_id=report.reporter_id,
+            reason=report.reason,
+            comment=report.comment,
+            status=report.status,
+            created_at=report.created_at,
+            resolved_at=report.resolved_at,
+            resolved_by=report.resolved_by,
+            review=schemas.ReviewResponse(
+                id=report.review.id,
+                user_id=report.review.user_id,
+                book_id=report.review.book_id,
+                text=report.review.text,
+                created_at=report.review.created_at,
+                user_name=report.review.user.full_name
+            ),
+            reporter_name=report.reporter.full_name
+        ))
+    
+    return result
+
+@app.post("/api/admin/reports/{report_id}/resolve")
+def resolve_report(
+    report_id: int,
+    action: str = Query(..., regex="^(dismiss|delete_review)$"),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """Обработать жалобу (только для админов)"""
+    report = crud.resolve_report(db, report_id, current_user.id, action)
+    if not report:
+        raise HTTPException(status_code=404, detail="Жалоба не найдена")
+    
+    return {"message": "Жалоба обработана", "action": action}
+
+@app.get("/api/admin/reports/stats")
+def get_reports_stats(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """Получить статистику по жалобам"""
+    return crud.get_reports_count(db)
+
+# ============ BOOKMARKS ENDPOINTS ============
+
+@app.get("/api/bookmarks/{book_id}")
+def get_bookmarks(
+    book_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Получить закладки пользователя для книги"""
+    bookmarks = crud.get_user_bookmarks(db, current_user.id, book_id)
+    return [{"page": b.page, "created_at": b.created_at} for b in bookmarks]
+
+@app.post("/api/bookmarks")
+def add_bookmark(
+    bookmark_data: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Добавить закладку"""
+    book_id = bookmark_data.get("book_id")
+    page = bookmark_data.get("page")
+    
+    if not book_id or not page:
+        raise HTTPException(status_code=400, detail="Необходимы book_id и page")
+    
+    bookmark = crud.add_bookmark(db, current_user.id, book_id, page)
+    return {"message": "Закладка добавлена", "page": bookmark.page}
+
+@app.delete("/api/bookmarks/{book_id}/{page}")
+def remove_bookmark(
+    book_id: int,
+    page: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Удалить закладку"""
+    if crud.remove_bookmark(db, current_user.id, book_id, page):
+        return {"message": "Закладка удалена"}
+    raise HTTPException(status_code=404, detail="Закладка не найдена")
+
+# ============ NOTES ENDPOINTS ============
+
+@app.get("/api/notes/{book_id}")
+def get_notes(
+    book_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Получить заметки пользователя для книги"""
+    notes = crud.get_user_notes(db, current_user.id, book_id)
+    return [{
+        "id": n.id,
+        "page": n.page,
+        "text": n.text,
+        "created_at": n.created_at
+    } for n in notes]
+
+@app.post("/api/notes")
+def create_note(
+    note_data: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Создать заметку"""
+    book_id = note_data.get("book_id")
+    page = note_data.get("page")
+    text = note_data.get("text")
+    
+    if not all([book_id, page, text]):
+        raise HTTPException(status_code=400, detail="Необходимы book_id, page и text")
+    
+    note = crud.create_note(db, current_user.id, book_id, page, text)
+    return {
+        "id": note.id,
+        "page": note.page,
+        "text": note.text,
+        "created_at": note.created_at
+    }
+
+@app.put("/api/notes/{note_id}")
+def update_note(
+    note_id: int,
+    note_data: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Обновить заметку"""
+    text = note_data.get("text")
+    if not text:
+        raise HTTPException(status_code=400, detail="Необходим text")
+    
+    note = crud.update_note(db, note_id, text)
+    if not note:
+        raise HTTPException(status_code=404, detail="Заметка не найдена")
+    
+    return {"message": "Заметка обновлена"}
+
+@app.delete("/api/notes/{note_id}")
+def delete_note(
+    note_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Удалить заметку"""
+    if crud.delete_note(db, note_id, current_user.id):
+        return {"message": "Заметка удалена"}
+    raise HTTPException(status_code=404, detail="Заметка не найдена")
+
 
 ==== FILE: backend\app\models.py ====
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, DateTime, Text, Table
@@ -2148,6 +2553,71 @@ class Rating(Base):
     
     user = relationship("User", back_populates="ratings")
     book = relationship("Book", back_populates="ratings")
+
+# Добавить в конец файла после класса Rating
+
+class ReviewReport(Base):
+    __tablename__ = "review_reports"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    review_id = Column(Integer, ForeignKey("reviews.id"), nullable=False)
+    reporter_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    reason = Column(String, nullable=False)  # spam, offensive, inappropriate
+    comment = Column(Text)
+    status = Column(String, default="pending")  # pending, resolved, dismissed
+    created_at = Column(DateTime, default=datetime.utcnow)
+    resolved_at = Column(DateTime)
+    resolved_by = Column(Integer, ForeignKey("users.id"))
+    
+    review = relationship("Review")
+    reporter = relationship("User", foreign_keys=[reporter_id])
+    resolver = relationship("User", foreign_keys=[resolved_by])
+
+# Закладки
+class Bookmark(Base):
+    __tablename__ = "bookmarks"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
+    page = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    user = relationship("User")
+    book = relationship("Book")
+
+# Заметки
+class Note(Base):
+    __tablename__ = "notes"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
+    page = Column(Integer, nullable=False)
+    text = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    user = relationship("User")
+    book = relationship("Book")
+
+# Жалобы на отзывы (уже есть в коде, который я давал)
+class ReviewReport(Base):
+    __tablename__ = "review_reports"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    review_id = Column(Integer, ForeignKey("reviews.id"), nullable=False)
+    reporter_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    reason = Column(String, nullable=False)
+    comment = Column(Text)
+    status = Column(String, default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    resolved_at = Column(DateTime)
+    resolved_by = Column(Integer, ForeignKey("users.id"))
+    
+    review = relationship("Review")
+    reporter = relationship("User", foreign_keys=[reporter_id])
+    resolver = relationship("User", foreign_keys=[resolved_by])
 
 
 ==== FILE: backend\app\schemas.py ====
@@ -2297,6 +2767,29 @@ class RatingResponse(RatingBase):
     user_id: int
     book_id: int
     created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Добавить в конец файла
+
+class ReviewReportCreate(BaseModel):
+    review_id: int
+    reason: str  # spam, offensive, inappropriate
+    comment: Optional[str] = None
+
+class ReviewReportResponse(BaseModel):
+    id: int
+    review_id: int
+    reporter_id: int
+    reason: str
+    comment: Optional[str]
+    status: str
+    created_at: datetime
+    resolved_at: Optional[datetime]
+    resolved_by: Optional[int]
+    review: ReviewResponse
+    reporter_name: str
     
     class Config:
         from_attributes = True
@@ -2507,8 +3000,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ToastProvider } from './components/ToastContainer'; // ✅ НОВОЕ
+
 import StaggeredMenu from './components/StaggeredMenu';
 import Footer from './components/Footer';
+
+// Основные страницы
 import LandingPage from './pages/LandingPage';
 import BooksPage from './pages/BooksPage';
 import BookDetailPage from './pages/BookDetailPage';
@@ -2516,6 +3013,11 @@ import FavoritesPage from './pages/FavoritesPage';
 import AuthPage from './pages/AuthPage';
 import AdminPage from './pages/AdminPage';
 import PrivacyPage from './pages/PrivacyPage';
+
+// ✅ НОВЫЕ СТРАНИЦЫ
+import ReaderPage from './pages/ReaderPage';
+import ModerationPage from './pages/ModerationPage';
+
 // Разделы напрямую
 import MethodClubPage from './pages/sections/MethodClubPage';
 import PioneersWorkPage from './pages/sections/PioneersWorkPage';
@@ -2534,50 +3036,59 @@ function App() {
     return (
         <ThemeProvider>
             <AuthProvider>
-                <Router>
-                    <div className="app">
-                        {/* Анимированное меню с подкатегориями */}
-                        <StaggeredMenu
-                            position="right"
-                            colors={['#667eea', '#764ba2']}
-                            logoText="📚 Библиотека Пионеров"
-                            accentColor="#667eea"  // ← Было #00e965, теперь фиолетовый
-                            menuButtonColor="#1d1d1f"
-                            openMenuButtonColor="#1d1d1f"
-                            changeMenuColorOnOpen={false}
-                            closeOnClickAway={true}
-                        />
+                <ToastProvider> {/* ✅ ОБЕРНУЛИ В ToastProvider */}
+                    <Router>
+                        <div className="app">
+                            {/* Анимированное меню с подкатегориями */}
+                            <StaggeredMenu
+                                position="right"
+                                colors={['#667eea', '#764ba2']}
+                                logoText="📚 Библиотека Пионеров"
+                                accentColor="#667eea"
+                                menuButtonColor="#1d1d1f"
+                                openMenuButtonColor="#1d1d1f"
+                                changeMenuColorOnOpen={false}
+                                closeOnClickAway={true}
+                            />
 
+                            <main className="main-content">
+                                <Routes>
+                                    {/* Основные страницы */}
+                                    <Route path="/" element={<LandingPage />} />
+                                    <Route path="/books" element={<BooksPage />} />
+                                    <Route path="/books/:id" element={<BookDetailPage />} />
 
-                        <main className="main-content">
-                            <Routes>
-                                {/* Основные страницы */}
-                                <Route path="/" element={<LandingPage />} />
-                                <Route path="/books" element={<BooksPage />} />
-                                <Route path="/books/:id" element={<BookDetailPage />} />
-                                <Route path="/favorites" element={<FavoritesPage />} />
-                                <Route path="/auth" element={<AuthPage />} />
-                                <Route path="/admin" element={<AdminPage />} />
-                                <Route path="/privacy" element={<PrivacyPage />} />
+                                    {/* ✅ НОВЫЙ РОУТ - ПОЛНОЭКРАННЫЙ РИДЕР */}
+                                    <Route path="/books/:id/read" element={<ReaderPage />} />
 
-                                {/* Разделы - прямые роуты без обертки */}
-                                <Route path="/sections/methodclub" element={<MethodClubPage />} />
-                                <Route path="/sections/pioneers" element={<PioneersWorkPage />} />
-                                <Route path="/sections/leaders" element={<SchoolLeadersPage />} />
-                                <Route path="/sections/volunteers" element={<VolunteersPage />} />
-                                <Route path="/sections/media" element={<SchoolMediaPage />} />
-                                <Route path="/sections/games" element={<GamesPage />} />
-                                <Route path="/sections/scenarios" element={<ScenariosPage />} />
-                                <Route path="/sections/book" element={<PioneerBookPage />} />
-                                <Route path="/sections/exchange" element={<ExchangePage />} />
-                                <Route path="/sections/contacts" element={<ContactsPage />} />
-                                <Route path="/sections/calendar" element={<CalendarPage />} />
-                                <Route path="/sections/documents" element={<DocumentsPage />} />
-                            </Routes>
-                        </main>
-                        <Footer />
-                    </div>
-                </Router>
+                                    <Route path="/favorites" element={<FavoritesPage />} />
+                                    <Route path="/auth" element={<AuthPage />} />
+                                    <Route path="/admin" element={<AdminPage />} />
+
+                                    {/* ✅ НОВЫЙ РОУТ - МОДЕРАЦИЯ (для админов) */}
+                                    <Route path="/admin/moderation" element={<ModerationPage />} />
+
+                                    <Route path="/privacy" element={<PrivacyPage />} />
+
+                                    {/* Разделы - прямые роуты без обертки */}
+                                    <Route path="/sections/methodclub" element={<MethodClubPage />} />
+                                    <Route path="/sections/pioneers" element={<PioneersWorkPage />} />
+                                    <Route path="/sections/leaders" element={<SchoolLeadersPage />} />
+                                    <Route path="/sections/volunteers" element={<VolunteersPage />} />
+                                    <Route path="/sections/media" element={<SchoolMediaPage />} />
+                                    <Route path="/sections/games" element={<GamesPage />} />
+                                    <Route path="/sections/scenarios" element={<ScenariosPage />} />
+                                    <Route path="/sections/book" element={<PioneerBookPage />} />
+                                    <Route path="/sections/exchange" element={<ExchangePage />} />
+                                    <Route path="/sections/contacts" element={<ContactsPage />} />
+                                    <Route path="/sections/calendar" element={<CalendarPage />} />
+                                    <Route path="/sections/documents" element={<DocumentsPage />} />
+                                </Routes>
+                            </main>
+                            <Footer />
+                        </div>
+                    </Router>
+                </ToastProvider>
             </AuthProvider>
         </ThemeProvider>
     );
@@ -3342,6 +3853,274 @@ root.render(
         <App />
     </React.StrictMode>
 );
+
+
+==== FILE: frontend\src\components\AdvancedSearchFilters.js ====
+import React, { useState, useEffect, useRef } from 'react';
+import { FiSearch, FiFilter, FiX, FiMic, FiMicOff, FiSliders } from 'react-icons/fi';
+import CustomSelect from './CustomSelect';
+import { filtersAPI } from '../services/api';
+import '../styles/AdvancedSearchFilters.css';
+
+const AdvancedSearchFilters = ({ onFilterChange, onSearch }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedTag, setSelectedTag] = useState('');
+    const [selectedGenre, setSelectedGenre] = useState('');
+    const [selectedAuthor, setSelectedAuthor] = useState('');
+    const [yearFrom, setYearFrom] = useState('');
+    const [yearTo, setYearTo] = useState('');
+    const [pagesFrom, setPagesFrom] = useState('');
+    const [pagesTo, setPagesTo] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+
+    const [tags, setTags] = useState([]);
+    const [genres, setGenres] = useState([]);
+    const [authors, setAuthors] = useState([]);
+
+    const recognitionRef = useRef(null);
+
+    useEffect(() => {
+        loadFilterOptions();
+        initSpeechRecognition();
+    }, []);
+
+    const loadFilterOptions = async () => {
+        try {
+            const [tagsData, genresData, authorsData] = await Promise.all([
+                filtersAPI.getTags(),
+                filtersAPI.getGenres(),
+                filtersAPI.getAuthors()
+            ]);
+            setTags(tagsData.tags || []);
+            setGenres(genresData.genres || []);
+            setAuthors(authorsData.authors || []);
+        } catch (error) {
+            console.error('Failed to load filters:', error);
+        }
+    };
+
+    const initSpeechRecognition = () => {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognitionRef.current = new SpeechRecognition();
+            recognitionRef.current.continuous = false;
+            recognitionRef.current.lang = 'ru-RU';
+            recognitionRef.current.interimResults = false;
+
+            recognitionRef.current.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                setSearchQuery(transcript);
+                handleSearch(transcript);
+                setIsListening(false);
+            };
+
+            recognitionRef.current.onerror = () => {
+                setIsListening(false);
+            };
+
+            recognitionRef.current.onend = () => {
+                setIsListening(false);
+            };
+        }
+    };
+
+    const toggleVoiceSearch = () => {
+        if (!recognitionRef.current) {
+            alert('Голосовой поиск не поддерживается вашим браузером');
+            return;
+        }
+
+        if (isListening) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        } else {
+            recognitionRef.current.start();
+            setIsListening(true);
+        }
+    };
+
+    const handleSearch = (query = searchQuery) => {
+        const filters = {
+            search: query,
+            tag: selectedTag,
+            genre: selectedGenre,
+            author: selectedAuthor,
+            yearFrom,
+            yearTo,
+            pagesFrom,
+            pagesTo
+        };
+        onFilterChange?.(filters);
+        onSearch?.(query);
+    };
+
+    const handleClearFilters = () => {
+        setSearchQuery('');
+        setSelectedTag('');
+        setSelectedGenre('');
+        setSelectedAuthor('');
+        setYearFrom('');
+        setYearTo('');
+        setPagesFrom('');
+        setPagesTo('');
+        onFilterChange?.({});
+    };
+
+    const hasActiveFilters = selectedTag || selectedGenre || selectedAuthor ||
+        yearFrom || yearTo || pagesFrom || pagesTo;
+
+    return (
+        <div className="advanced-search-filters">
+            {/* Основная поисковая строка */}
+            <div className="search-bar-wrapper">
+                <div className="search-bar">
+                    <FiSearch className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Поиск по книгам..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        className="search-input"
+                    />
+                    {searchQuery && (
+                        <button
+                            className="clear-search-btn"
+                            onClick={() => {
+                                setSearchQuery('');
+                                handleSearch('');
+                            }}
+                            aria-label="Очистить поиск"
+                        >
+                            <FiX />
+                        </button>
+                    )}
+                    <button
+                        className={`voice-search-btn ${isListening ? 'listening' : ''}`}
+                        onClick={toggleVoiceSearch}
+                        aria-label="Голосовой поиск"
+                        title={isListening ? 'Остановить запись' : 'Голосовой поиск'}
+                    >
+                        {isListening ? <FiMicOff /> : <FiMic />}
+                    </button>
+                </div>
+
+                <button
+                    className={`advanced-toggle ${showAdvanced ? 'active' : ''}`}
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                >
+                    <FiSliders />
+                    Расширенный поиск
+                </button>
+            </div>
+
+            {/* Быстрые фильтры */}
+            <div className="quick-filters">
+                <CustomSelect
+                    options={tags}
+                    value={selectedTag}
+                    onChange={(value) => {
+                        setSelectedTag(value);
+                        handleSearch();
+                    }}
+                    placeholder="Тег"
+                    className="filter-select"
+                />
+
+                <CustomSelect
+                    options={genres}
+                    value={selectedGenre}
+                    onChange={(value) => {
+                        setSelectedGenre(value);
+                        handleSearch();
+                    }}
+                    placeholder="Жанр"
+                    className="filter-select"
+                />
+
+                <CustomSelect
+                    options={authors}
+                    value={selectedAuthor}
+                    onChange={(value) => {
+                        setSelectedAuthor(value);
+                        handleSearch();
+                    }}
+                    placeholder="Автор"
+                    className="filter-select"
+                />
+
+                {hasActiveFilters && (
+                    <button className="clear-filters-btn" onClick={handleClearFilters}>
+                        <FiX /> Сбросить
+                    </button>
+                )}
+            </div>
+
+            {/* Расширенные фильтры */}
+            {showAdvanced && (
+                <div className="advanced-filters">
+                    <div className="filter-group">
+                        <label>Год издания</label>
+                        <div className="range-inputs">
+                            <input
+                                type="number"
+                                placeholder="От"
+                                value={yearFrom}
+                                onChange={(e) => setYearFrom(e.target.value)}
+                                onBlur={handleSearch}
+                                min="1900"
+                                max={new Date().getFullYear()}
+                            />
+                            <span>—</span>
+                            <input
+                                type="number"
+                                placeholder="До"
+                                value={yearTo}
+                                onChange={(e) => setYearTo(e.target.value)}
+                                onBlur={handleSearch}
+                                min="1900"
+                                max={new Date().getFullYear()}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="filter-group">
+                        <label>Количество страниц</label>
+                        <div className="range-inputs">
+                            <input
+                                type="number"
+                                placeholder="От"
+                                value={pagesFrom}
+                                onChange={(e) => setPagesFrom(e.target.value)}
+                                onBlur={handleSearch}
+                                min="1"
+                            />
+                            <span>—</span>
+                            <input
+                                type="number"
+                                placeholder="До"
+                                value={pagesTo}
+                                onChange={(e) => setPagesTo(e.target.value)}
+                                onBlur={handleSearch}
+                                min="1"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isListening && (
+                <div className="listening-indicator">
+                    <div className="pulse-animation"></div>
+                    <span>Говорите...</span>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default AdvancedSearchFilters;
 
 
 ==== FILE: frontend\src\components\Ballpit.js ====
@@ -4364,6 +5143,111 @@ export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude 
 }
 
 
+==== FILE: frontend\src\components\ReportModal.js ====
+import React, { useState } from 'react';
+import { FiAlertTriangle, FiX } from 'react-icons/fi';
+import { booksAPI } from '../services/api';
+import { useToast } from './ToastContainer';
+import '../styles/ReportModal.css';
+
+const ReportModal = ({ review, onClose, onSuccess }) => {
+    const { showSuccess, showError } = useToast();
+    const [reason, setReason] = useState('');
+    const [comment, setComment] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const reasons = [
+        { value: 'spam', label: 'Спам или реклама' },
+        { value: 'offensive', label: 'Оскорбительный контент' },
+        { value: 'inappropriate', label: 'Неуместный контент' },
+        { value: 'other', label: 'Другое' }
+    ];
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!reason) {
+            showError('Выберите причину жалобы');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await booksAPI.reportReview(review.id, reason, comment);
+            showSuccess('Жалоба отправлена. Модераторы рассмотрят её в ближайшее время');
+            onSuccess?.();
+            onClose();
+        } catch (error) {
+            showError(error.response?.data?.detail || 'Не удалось отправить жалобу');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="report-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <div className="modal-title">
+                        <FiAlertTriangle />
+                        <h2>Пожаловаться на отзыв</h2>
+                    </div>
+                    <button className="modal-close" onClick={onClose}>
+                        <FiX />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="report-form">
+                    <div className="review-preview">
+                        <p className="review-author">{review.user_name}</p>
+                        <p className="review-text">{review.text}</p>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Причина жалобы *</label>
+                        <div className="radio-group">
+                            {reasons.map((r) => (
+                                <label key={r.value} className="radio-label">
+                                    <input
+                                        type="radio"
+                                        name="reason"
+                                        value={r.value}
+                                        checked={reason === r.value}
+                                        onChange={(e) => setReason(e.target.value)}
+                                    />
+                                    <span>{r.label}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Дополнительная информация</label>
+                        <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder="Опишите проблему подробнее..."
+                            rows={4}
+                        />
+                    </div>
+
+                    <div className="modal-actions">
+                        <button type="button" className="btn-cancel" onClick={onClose}>
+                            Отмена
+                        </button>
+                        <button type="submit" className="btn-submit" disabled={loading || !reason}>
+                            {loading ? 'Отправка...' : 'Отправить жалобу'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+export default ReportModal;
+
+
 ==== FILE: frontend\src\components\SearchFilters.js ====
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -4981,6 +5865,92 @@ export const StaggeredMenu = ({
 };
 
 export default StaggeredMenu;
+
+
+==== FILE: frontend\src\components\Toast.js ====
+import React, { useEffect } from 'react';
+import '../styles/Toast.css';
+import { FiAlertCircle, FiCheckCircle, FiInfo, FiX, FiClock } from 'react-icons/fi';
+
+const Toast = ({ message, type = 'info', duration = 5000, onClose }) => {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, duration);
+
+        return () => clearTimeout(timer);
+    }, [duration, onClose]);
+
+    const icons = {
+        success: <FiCheckCircle />,
+        error: <FiAlertCircle />,
+        warning: <FiClock />,
+        info: <FiInfo />
+    };
+
+    return (
+        <div className={`toast toast-${type}`}>
+            <div className="toast-icon">{icons[type]}</div>
+            <div className="toast-message">{message}</div>
+            <button className="toast-close" onClick={onClose} aria-label="Закрыть">
+                <FiX />
+            </button>
+        </div>
+    );
+};
+
+export default Toast;
+
+
+==== FILE: frontend\src\components\ToastContainer.js ====
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import Toast from './Toast';
+import '../styles/Toast.css';
+
+const ToastContext = createContext();
+
+export const useToast = () => {
+    const context = useContext(ToastContext);
+    if (!context) {
+        throw new Error('useToast must be used within ToastProvider');
+    }
+    return context;
+};
+
+export const ToastProvider = ({ children }) => {
+    const [toasts, setToasts] = useState([]);
+
+    const addToast = useCallback((message, type = 'info', duration = 5000) => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, message, type, duration }]);
+    }, []);
+
+    const removeToast = useCallback((id) => {
+        setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, []);
+
+    const showSuccess = useCallback((message) => addToast(message, 'success'), [addToast]);
+    const showError = useCallback((message) => addToast(message, 'error'), [addToast]);
+    const showWarning = useCallback((message) => addToast(message, 'warning', 7000), [addToast]);
+    const showInfo = useCallback((message) => addToast(message, 'info'), [addToast]);
+
+    return (
+        <ToastContext.Provider value={{ addToast, showSuccess, showError, showWarning, showInfo }}>
+            {children}
+            <div className="toast-container">
+                {toasts.map(toast => (
+                    <Toast
+                        key={toast.id}
+                        message={toast.message}
+                        type={toast.type}
+                        duration={toast.duration}
+                        onClose={() => removeToast(toast.id)}
+                    />
+                ))}
+            </div>
+        </ToastContext.Provider>
+    );
+};
 
 
 ==== FILE: frontend\src\contexts\AuthContext.js ====
@@ -5651,23 +6621,25 @@ export default AuthPage;
 ==== FILE: frontend\src\pages\BookDetailPage.js ====
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { FiBook, FiDownload, FiHeart, FiCheckCircle, FiAlertTriangle } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/ToastContainer'; // ✅ НОВОЕ
+import ReportModal from '../components/ReportModal'; // ✅ НОВОЕ
 import { booksAPI, reviewsAPI, ratingsAPI, favoritesAPI, readStatusAPI } from '../services/api';
 import '../styles/BookDetailPage.css';
-
 
 const BookDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
+    const { showSuccess, showError, showWarning } = useToast(); // ✅ НОВОЕ
 
     const [book, setBook] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [reviewText, setReviewText] = useState('');
     const [userRating, setUserRating] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [showPDF, setShowPDF] = useState(false);
-    const [error, setError] = useState(''); // Добавлено для отображения ошибок
+    const [reportingReview, setReportingReview] = useState(null); // ✅ НОВОЕ
 
     useEffect(() => {
         loadBookData();
@@ -5684,17 +6656,19 @@ const BookDetailPage = () => {
             setUserRating(bookRes.data.user_rating || 0);
         } catch (error) {
             console.error('Error loading book:', error);
+            showError('Не удалось загрузить данные книги');
         } finally {
             setLoading(false);
         }
     };
 
-    const showError = (message) => {
-        setError(message);
-        setTimeout(() => setError(''), 5000); // Скрыть через 5 секунд
-    };
-
     const handleDownload = async () => {
+        if (!isAuthenticated) {
+            showWarning('Войдите, чтобы скачать книгу');
+            navigate('/auth');
+            return;
+        }
+
         try {
             const response = await booksAPI.download(id);
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -5704,21 +6678,23 @@ const BookDetailPage = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
+            showSuccess('Книга успешно скачана!');
         } catch (error) {
             console.error('Error downloading book:', error);
             if (error.response?.status === 429) {
-                showError(error.response.data?.detail || 'Вы можете скачивать файлы не чаще 1 раза в 30 секунд. Подождите.');
+                showWarning(error.response.data?.detail || 'Подождите 30 секунд перед следующей загрузкой');
             } else if (error.response?.status === 401) {
-                showError('Необходимо войти в систему для скачивания');
+                showWarning('Необходимо войти в систему для скачивания');
                 navigate('/auth');
             } else {
-                showError('Ошибка при скачивании книги');
+                showError('Не удалось скачать книгу');
             }
         }
     };
 
     const handleRating = async (value) => {
         if (!isAuthenticated) {
+            showWarning('Войдите, чтобы поставить оценку');
             navigate('/auth');
             return;
         }
@@ -5727,12 +6703,13 @@ const BookDetailPage = () => {
             await ratingsAPI.create({ book_id: parseInt(id), value });
             setUserRating(value);
             loadBookData();
+            showSuccess(`Вы поставили оценку ${value} ★`);
         } catch (error) {
             console.error('Error rating book:', error);
             if (error.response?.status === 429) {
-                showError(error.response.data?.detail || 'Вы можете ставить оценки не чаще 1 раза в минуту. Подождите.');
+                showWarning(error.response.data?.detail || 'Подождите минуту перед следующей оценкой');
             } else {
-                showError('Ошибка при выставлении оценки');
+                showError('Не удалось поставить оценку');
             }
         }
     };
@@ -5740,7 +6717,13 @@ const BookDetailPage = () => {
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
         if (!isAuthenticated) {
+            showWarning('Войдите, чтобы оставить отзыв');
             navigate('/auth');
+            return;
+        }
+
+        if (!reviewText.trim()) {
+            showWarning('Введите текст отзыва');
             return;
         }
 
@@ -5748,19 +6731,20 @@ const BookDetailPage = () => {
             await reviewsAPI.create({ book_id: parseInt(id), text: reviewText });
             setReviewText('');
             loadBookData();
-            showError('Отзыв успешно добавлен!'); // Используем для успеха тоже
+            showSuccess('Отзыв успешно добавлен!');
         } catch (error) {
             console.error('Error submitting review:', error);
             if (error.response?.status === 429) {
-                showError(error.response.data?.detail || 'Вы можете оставлять не более 1 отзыва в минуту. Подождите.');
+                showWarning(error.response.data?.detail || 'Подождите минуту перед следующим отзывом');
             } else {
-                showError('Ошибка при отправке отзыва');
+                showError('Не удалось отправить отзыв');
             }
         }
     };
 
     const handleToggleFavorite = async () => {
         if (!isAuthenticated) {
+            showWarning('Войдите, чтобы добавить в избранное');
             navigate('/auth');
             return;
         }
@@ -5768,22 +6752,25 @@ const BookDetailPage = () => {
         try {
             if (book.is_favorite) {
                 await favoritesAPI.remove(id);
+                showSuccess('Удалено из избранного');
             } else {
                 await favoritesAPI.add(id);
+                showSuccess('Добавлено в избранное ❤️');
             }
             loadBookData();
         } catch (error) {
             console.error('Error toggling favorite:', error);
             if (error.response?.status === 429) {
-                showError(error.response.data?.detail || 'Слишком частые действия. Подождите.');
+                showWarning(error.response.data?.detail || 'Слишком частые действия');
             } else {
-                showError('Ошибка при обновлении избранного');
+                showError('Не удалось обновить избранное');
             }
         }
     };
 
     const handleToggleRead = async () => {
         if (!isAuthenticated) {
+            showWarning('Войдите, чтобы отметить как прочитанное');
             navigate('/auth');
             return;
         }
@@ -5791,140 +6778,147 @@ const BookDetailPage = () => {
         try {
             if (book.is_read) {
                 await readStatusAPI.markAsUnread(id);
+                showSuccess('Отмечено как непрочитанное');
             } else {
                 await readStatusAPI.markAsRead(id);
+                showSuccess('Отмечено как прочитанное ✓');
             }
             loadBookData();
         } catch (error) {
             console.error('Error toggling read:', error);
             if (error.response?.status === 429) {
-                showError(error.response.data?.detail || 'Слишком частые действия. Подождите.');
+                showWarning(error.response.data?.detail || 'Слишком частые действия');
             } else {
-                showError('Ошибка при обновлении статуса прочтения');
+                showError('Не удалось обновить статус');
             }
         }
     };
 
-    const handleViewPDF = async () => {
-        if (!isAuthenticated) {
-            navigate('/auth');
-            return;
-        }
+    if (loading) {
+        return (
+            <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Загрузка книги...</p>
+            </div>
+        );
+    }
 
-        try {
-            setShowPDF(!showPDF);
-        } catch (error) {
-            console.error('Error viewing PDF:', error);
-            if (error.response?.status === 429) {
-                showError(error.response.data?.detail || 'Вы можете открывать книги не чаще 1 раза в 30 секунд. Подождите.');
-            } else {
-                showError('Ошибка при открытии книги');
-            }
-        }
-    };
-
-    if (loading) return <div className="loading">Загрузка...</div>;
-    if (!book) return <div className="error">Книга не найдена</div>;
+    if (!book) {
+        return (
+            <div className="error-container">
+                <h2>Книга не найдена</h2>
+                <button onClick={() => navigate('/books')}>Вернуться к каталогу</button>
+            </div>
+        );
+    }
 
     return (
         <div className="book-detail-page">
             <div className="book-detail-container">
-                {/* Уведомление об ошибках */}
-                {error && (
-                    <div className="notification-message">
-                        {error}
-                    </div>
-                )}
-
-                <div className="book-main-info">
-                    <h1 className="book-detail-title">{book.title}</h1>
-                    <p className="book-detail-author">Автор: {book.author}</p>
-
-                    <div className="book-detail-tags">
-                        <span className="detail-tag tag-genre">{book.genre}</span>
-                        <span className="detail-tag tag-category">{book.tag}</span>
+                <div className="book-detail-header">
+                    <div className="book-detail-cover">
+                        <div className="book-detail-cover-placeholder">
+                            {book.title.charAt(0)}
+                        </div>
                     </div>
 
-                    {book.description && (
-                        <div className="book-description">
-                            <h3>Описание</h3>
-                            <p>{book.description}</p>
-                        </div>
-                    )}
+                    <div className="book-detail-info">
+                        <h1 className="book-detail-title">{book.title}</h1>
+                        <p className="book-detail-author">{book.author}</p>
 
-                    <div className="book-rating-section">
-                        <div className="average-rating">
-                            <span className="rating-label">Средний рейтинг:</span>
-                            <span className="rating-value">
-                                {book.average_rating ? `★ ${book.average_rating.toFixed(1)}` : 'Нет оценок'}
-                            </span>
+                        <div className="book-detail-tags">
+                            <span className="detail-tag tag-genre">{book.genre}</span>
+                            <span className="detail-tag tag-category">{book.tag}</span>
                         </div>
 
-                        {isAuthenticated && (
-                            <div className="user-rating">
-                                <span className="rating-label">Ваша оценка:</span>
-                                <div className="stars">
-                                    {[1, 2, 3, 4, 5].map(star => (
-                                        <button
-                                            key={star}
-                                            className={`star ${userRating >= star ? 'active' : ''}`}
-                                            onClick={() => handleRating(star)}
-                                        >
-                                            ★
-                                        </button>
-                                    ))}
-                                </div>
+                        {book.description && (
+                            <div className="book-description">
+                                <h3>Описание</h3>
+                                <p>{book.description}</p>
                             </div>
                         )}
-                    </div>
 
-                    <div className="book-actions">
-                        <button className="btn-action btn-read" onClick={handleViewPDF}>
-                            {showPDF ? 'Скрыть книгу' : 'Читать онлайн'}
-                        </button>
-                        <button className="btn-action btn-download" onClick={handleDownload}>
-                            Скачать
-                        </button>
-                        {isAuthenticated && (
-                            <>
-                                <button
-                                    className={`btn-action ${book.is_favorite ? 'active' : ''}`}
-                                    onClick={handleToggleFavorite}
-                                >
-                                    {book.is_favorite ? 'В избранном' : 'Добавить в избранное'}
-                                </button>
-                                <button
-                                    className={`btn-action ${book.is_read ? 'active' : ''}`}
-                                    onClick={handleToggleRead}
-                                >
-                                    {book.is_read ? 'Прочитано' : 'Отметить как прочитанное'}
-                                </button>
-                            </>
-                        )}
+                        {/* ✅ РЕЙТИНГ С УЛУЧШЕННЫМ UI */}
+                        <div className="book-rating-section">
+                            <div className="average-rating">
+                                <span className="rating-label">Средний рейтинг:</span>
+                                <span className="rating-value">
+                                    {book.average_rating ? (
+                                        <>★ {book.average_rating.toFixed(1)}</>
+                                    ) : (
+                                        'Нет оценок'
+                                    )}
+                                </span>
+                            </div>
+
+                            {isAuthenticated && (
+                                <div className="user-rating">
+                                    <p className="user-rating-label">Ваша оценка:</p>
+                                    <div className="stars">
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <button
+                                                key={star}
+                                                className={`star ${userRating >= star ? 'active' : ''}`}
+                                                onClick={() => handleRating(star)}
+                                                aria-label={`Оценить на ${star}`}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* ✅ НОВЫЕ КНОПКИ С ИКОНКАМИ */}
+                        <div className="book-actions">
+                            <button
+                                className="action-btn read-btn"
+                                onClick={() => navigate(`/books/${id}/read`)}
+                            >
+                                <FiBook /> Читать онлайн
+                            </button>
+
+                            <button
+                                className="action-btn download-btn"
+                                onClick={handleDownload}
+                            >
+                                <FiDownload /> Скачать PDF
+                            </button>
+
+                            {isAuthenticated && (
+                                <>
+                                    <button
+                                        className={`action-btn favorite-btn ${book.is_favorite ? 'active' : ''}`}
+                                        onClick={handleToggleFavorite}
+                                    >
+                                        <FiHeart /> {book.is_favorite ? 'В избранном' : 'В избранное'}
+                                    </button>
+
+                                    <button
+                                        className={`action-btn read-status-btn ${book.is_read ? 'active' : ''}`}
+                                        onClick={handleToggleRead}
+                                    >
+                                        <FiCheckCircle /> {book.is_read ? 'Прочитано' : 'Прочитать'}
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {showPDF && (
-                    <div className="pdf-viewer">
-                        <iframe
-                            src={booksAPI.view(id)}
-                            title={book.title}
-                            width="100%"
-                            height="800px"
-                        />
-                    </div>
-                )}
-
+                {/* ✅ СЕКЦИЯ ОТЗЫВОВ С ЖАЛОБАМИ */}
                 <div className="reviews-section">
-                    <h2>Отзывы</h2>
+                    <h2>Отзывы ({reviews.length})</h2>
 
                     {isAuthenticated && (
                         <form className="review-form" onSubmit={handleReviewSubmit}>
                             <textarea
                                 className="review-textarea"
-                                placeholder="Напишите ваш отзыв..."
+                                placeholder="Поделитесь своим мнением о книге..."
                                 value={reviewText}
                                 onChange={(e) => setReviewText(e.target.value)}
+                                rows={4}
                                 required
                             />
                             <button type="submit" className="btn-submit">
@@ -5935,15 +6929,34 @@ const BookDetailPage = () => {
 
                     <div className="reviews-list">
                         {reviews.length === 0 ? (
-                            <p className="no-reviews">Пока нет отзывов</p>
+                            <div className="no-reviews">
+                                <p>Будьте первым, кто оставит отзыв!</p>
+                            </div>
                         ) : (
                             reviews.map(review => (
                                 <div key={review.id} className="review-item">
                                     <div className="review-header">
-                                        <span className="review-author">{review.user_name}</span>
-                                        <span className="review-date">
-                                            {new Date(review.created_at).toLocaleDateString('ru-RU')}
-                                        </span>
+                                        <div className="review-author-info">
+                                            <span className="review-author">{review.user_name}</span>
+                                            <span className="review-date">
+                                                {new Date(review.created_at).toLocaleDateString('ru-RU', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </span>
+                                        </div>
+
+                                        {/* ✅ КНОПКА ЖАЛОБЫ (только не на свой отзыв) */}
+                                        {user && review.user_id !== user.id && (
+                                            <button
+                                                className="report-review-btn"
+                                                onClick={() => setReportingReview(review)}
+                                                title="Пожаловаться на отзыв"
+                                            >
+                                                <FiAlertTriangle />
+                                            </button>
+                                        )}
                                     </div>
 
                                     <p className="review-text">{review.text}</p>
@@ -5953,6 +6966,18 @@ const BookDetailPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* ✅ МОДАЛ ЖАЛОБЫ */}
+            {reportingReview && (
+                <ReportModal
+                    review={reportingReview}
+                    onClose={() => setReportingReview(null)}
+                    onSuccess={() => {
+                        setReportingReview(null);
+                        showSuccess('Жалоба отправлена на модерацию');
+                    }}
+                />
+            )}
         </div>
     );
 };
@@ -6381,6 +7406,187 @@ const LandingPage = () => {
 export default LandingPage;
 
 
+==== FILE: frontend\src\pages\ModerationPage.js ====
+import React, { useState, useEffect } from 'react';
+import { FiAlertTriangle, FiTrash2, FiCheckCircle, FiClock } from 'react-icons/fi';
+import { booksAPI } from '../services/api';
+import { useToast } from '../components/ToastContainer';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import '../styles/ModerationPage.css';
+
+const ModerationPage = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    const { showSuccess, showError } = useToast();
+    const [reports, setReports] = useState([]);
+    const [stats, setStats] = useState({ total: 0, pending: 0, resolved: 0 });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user?.is_admin) {
+            navigate('/');
+            return;
+        }
+        loadReports();
+        loadStats();
+    }, [user, navigate]);
+
+    const loadReports = async () => {
+        try {
+            const data = await booksAPI.getReports();
+            setReports(data);
+        } catch (error) {
+            showError('Не удалось загрузить жалобы');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadStats = async () => {
+        try {
+            const data = await booksAPI.getReportsStats();
+            setStats(data);
+        } catch (error) {
+            console.error('Failed to load stats:', error);
+        }
+    };
+
+    const handleResolve = async (reportId, action) => {
+        try {
+            await booksAPI.resolveReport(reportId, action);
+            showSuccess(action === 'dismiss' ? 'Жалоба отклонена' : 'Отзыв удалён');
+            loadReports();
+            loadStats();
+        } catch (error) {
+            showError('Не удалось обработать жалобу');
+        }
+    };
+
+    const reasonLabels = {
+        spam: 'Спам или реклама',
+        offensive: 'Оскорбительный контент',
+        inappropriate: 'Неуместный контент',
+        other: 'Другое'
+    };
+
+    if (loading) {
+        return (
+            <div className="moderation-loading">
+                <div className="spinner"></div>
+                <p>Загрузка жалоб...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="moderation-page">
+            <div className="moderation-container">
+                <header className="moderation-header">
+                    <div>
+                        <h1>Модерация отзывов</h1>
+                        <p>Управление жалобами пользователей</p>
+                    </div>
+                </header>
+
+                <div className="stats-cards">
+                    <div className="stat-card">
+                        <div className="stat-icon pending">
+                            <FiClock />
+                        </div>
+                        <div className="stat-content">
+                            <div className="stat-value">{stats.pending}</div>
+                            <div className="stat-label">Ожидают</div>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon resolved">
+                            <FiCheckCircle />
+                        </div>
+                        <div className="stat-content">
+                            <div className="stat-value">{stats.resolved}</div>
+                            <div className="stat-label">Обработано</div>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon total">
+                            <FiAlertTriangle />
+                        </div>
+                        <div className="stat-content">
+                            <div className="stat-value">{stats.total}</div>
+                            <div className="stat-label">Всего жалоб</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="reports-list">
+                    {reports.length === 0 ? (
+                        <div className="empty-state">
+                            <FiCheckCircle />
+                            <h3>Нет активных жалоб</h3>
+                            <p>Все жалобы обработаны</p>
+                        </div>
+                    ) : (
+                        reports.map((report) => (
+                            <div key={report.id} className="report-card">
+                                <div className="report-header">
+                                    <div className="report-meta">
+                                        <span className={`reason-badge ${report.reason}`}>
+                                            {reasonLabels[report.reason] || report.reason}
+                                        </span>
+                                        <span className="report-date">
+                                            {new Date(report.created_at).toLocaleDateString('ru-RU')}
+                                        </span>
+                                    </div>
+                                    <div className="report-reporter">
+                                        От: <strong>{report.reporter_name}</strong>
+                                    </div>
+                                </div>
+
+                                <div className="reported-review">
+                                    <div className="review-author">
+                                        Автор отзыва: <strong>{report.review.user_name}</strong>
+                                    </div>
+                                    <p className="review-text">{report.review.text}</p>
+                                </div>
+
+                                {report.comment && (
+                                    <div className="report-comment">
+                                        <strong>Комментарий:</strong>
+                                        <p>{report.comment}</p>
+                                    </div>
+                                )}
+
+                                <div className="report-actions">
+                                    <button
+                                        className="action-btn dismiss"
+                                        onClick={() => handleResolve(report.id, 'dismiss')}
+                                    >
+                                        <FiCheckCircle />
+                                        Отклонить жалобу
+                                    </button>
+                                    <button
+                                        className="action-btn delete"
+                                        onClick={() => handleResolve(report.id, 'delete_review')}
+                                    >
+                                        <FiTrash2 />
+                                        Удалить отзыв
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ModerationPage;
+
+
 ==== FILE: frontend\src\pages\PrivacyPage.js ====
 import React from 'react';
 import '../styles/PrivacyPage.css';
@@ -6569,6 +7775,286 @@ const PrivacyPage = () => {
 };
 
 export default PrivacyPage;
+
+
+==== FILE: frontend\src\pages\ReaderPage.js ====
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FiX, FiBookmark, FiMaximize, FiMinimize, FiChevronLeft, FiChevronRight, FiEdit3, FiSave } from 'react-icons/fi';
+import { booksAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/ToastContainer';
+import '../styles/ReaderPage.css';
+
+const ReaderPage = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const { showSuccess, showError, showWarning } = useToast();
+
+    const [book, setBook] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [bookmarks, setBookmarks] = useState([]);
+    const [notes, setNotes] = useState([]);
+    const [showNoteEditor, setShowNoteEditor] = useState(false);
+    const [noteText, setNoteText] = useState('');
+    const [editingNote, setEditingNote] = useState(null);
+
+    const viewerRef = useRef(null);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        loadBook();
+        loadBookmarks();
+        loadNotes();
+    }, [id]);
+
+    const loadBook = async () => {
+        try {
+            const data = await booksAPI.getBook(id);
+            setBook(data);
+        } catch (error) {
+            showError('Не удалось загрузить книгу');
+            navigate('/books');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadBookmarks = async () => {
+        if (!user) return;
+        try {
+            const data = await booksAPI.getBookmarks(id);
+            setBookmarks(data);
+        } catch (error) {
+            console.error('Failed to load bookmarks:', error);
+        }
+    };
+
+    const loadNotes = async () => {
+        if (!user) return;
+        try {
+            const data = await booksAPI.getNotes(id);
+            setNotes(data);
+        } catch (error) {
+            console.error('Failed to load notes:', error);
+        }
+    };
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            containerRef.current?.requestFullscreen();
+            setIsFullscreen(true);
+        } else {
+            document.exitFullscreen();
+            setIsFullscreen(false);
+        }
+    };
+
+    const addBookmark = async () => {
+        if (!user) {
+            showWarning('Войдите, чтобы добавить закладку');
+            return;
+        }
+
+        try {
+            await booksAPI.addBookmark(id, currentPage);
+            setBookmarks([...bookmarks, { page: currentPage, created_at: new Date() }]);
+            showSuccess(`Закладка добавлена на стр. ${currentPage}`);
+        } catch (error) {
+            showError('Не удалось добавить закладку');
+        }
+    };
+
+    const removeBookmark = async (page) => {
+        try {
+            await booksAPI.removeBookmark(id, page);
+            setBookmarks(bookmarks.filter(b => b.page !== page));
+            showSuccess('Закладка удалена');
+        } catch (error) {
+            showError('Не удалось удалить закладку');
+        }
+    };
+
+    const saveNote = async () => {
+        if (!user) {
+            showWarning('Войдите, чтобы сохранить заметку');
+            return;
+        }
+
+        if (!noteText.trim()) {
+            showWarning('Введите текст заметки');
+            return;
+        }
+
+        try {
+            if (editingNote) {
+                await booksAPI.updateNote(editingNote.id, noteText);
+                setNotes(notes.map(n => n.id === editingNote.id ? { ...n, text: noteText } : n));
+                showSuccess('Заметка обновлена');
+            } else {
+                const newNote = await booksAPI.createNote(id, currentPage, noteText);
+                setNotes([...notes, newNote]);
+                showSuccess('Заметка сохранена');
+            }
+            setNoteText('');
+            setEditingNote(null);
+            setShowNoteEditor(false);
+        } catch (error) {
+            showError('Не удалось сохранить заметку');
+        }
+    };
+
+    const isBookmarked = bookmarks.some(b => b.page === currentPage);
+
+    if (loading) {
+        return (
+            <div className="reader-loading">
+                <div className="spinner"></div>
+                <p>Загрузка книги...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div ref={containerRef} className={`reader-container ${isFullscreen ? 'fullscreen' : ''}`}>
+            {/* Header */}
+            <div className="reader-header">
+                <button className="reader-close" onClick={() => navigate(`/books/${id}`)} aria-label="Закрыть">
+                    <FiX />
+                </button>
+                <h1 className="reader-title">{book?.title}</h1>
+                <div className="reader-controls">
+                    <button
+                        className={`reader-btn ${isBookmarked ? 'active' : ''}`}
+                        onClick={isBookmarked ? () => removeBookmark(currentPage) : addBookmark}
+                        aria-label="Закладка"
+                    >
+                        <FiBookmark />
+                    </button>
+                    <button
+                        className="reader-btn"
+                        onClick={() => setShowNoteEditor(!showNoteEditor)}
+                        aria-label="Заметка"
+                    >
+                        <FiEdit3 />
+                    </button>
+                    <button className="reader-btn" onClick={toggleFullscreen} aria-label="Полный экран">
+                        {isFullscreen ? <FiMinimize /> : <FiMaximize />}
+                    </button>
+                </div>
+            </div>
+
+            {/* PDF Viewer */}
+            <div className="reader-viewer" ref={viewerRef}>
+                <iframe
+                    src={`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/books/${id}/view`}
+                    title={book?.title}
+                    className="pdf-iframe"
+                />
+            </div>
+
+            {/* Sidebar with bookmarks and notes */}
+            <div className="reader-sidebar">
+                <div className="sidebar-section">
+                    <h3>Закладки ({bookmarks.length})</h3>
+                    <div className="bookmarks-list">
+                        {bookmarks.map((bookmark, index) => (
+                            <div key={index} className="bookmark-item">
+                                <button onClick={() => setCurrentPage(bookmark.page)}>
+                                    Страница {bookmark.page}
+                                </button>
+                                <button onClick={() => removeBookmark(bookmark.page)} className="remove-btn">
+                                    <FiX />
+                                </button>
+                            </div>
+                        ))}
+                        {bookmarks.length === 0 && (
+                            <p className="empty-message">Нет закладок</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="sidebar-section">
+                    <h3>Заметки ({notes.length})</h3>
+                    <div className="notes-list">
+                        {notes.map((note) => (
+                            <div key={note.id} className="note-item">
+                                <div className="note-header">
+                                    <span>Стр. {note.page}</span>
+                                    <button onClick={() => {
+                                        setEditingNote(note);
+                                        setNoteText(note.text);
+                                        setShowNoteEditor(true);
+                                    }}>
+                                        <FiEdit3 />
+                                    </button>
+                                </div>
+                                <p>{note.text}</p>
+                            </div>
+                        ))}
+                        {notes.length === 0 && (
+                            <p className="empty-message">Нет заметок</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Note Editor Modal */}
+            {showNoteEditor && (
+                <div className="note-editor-modal">
+                    <div className="note-editor">
+                        <h3>{editingNote ? 'Редактировать заметку' : 'Новая заметка'}</h3>
+                        <textarea
+                            value={noteText}
+                            onChange={(e) => setNoteText(e.target.value)}
+                            placeholder="Введите текст заметки..."
+                            rows={6}
+                        />
+                        <div className="note-editor-actions">
+                            <button className="btn-cancel" onClick={() => {
+                                setShowNoteEditor(false);
+                                setNoteText('');
+                                setEditingNote(null);
+                            }}>
+                                Отмена
+                            </button>
+                            <button className="btn-save" onClick={saveNote}>
+                                <FiSave /> Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Navigation */}
+            <div className="reader-navigation">
+                <button
+                    className="nav-btn"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                >
+                    <FiChevronLeft /> Назад
+                </button>
+                <span className="page-indicator">
+                    Страница {currentPage} из {totalPages || '...'}
+                </span>
+                <button
+                    className="nav-btn"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={totalPages && currentPage >= totalPages}
+                >
+                    Вперёд <FiChevronRight />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default ReaderPage;
 
 
 ==== FILE: frontend\src\pages\sections\CalendarPage.js ====
@@ -7505,6 +8991,78 @@ export const filtersAPI = {
 };
 
 export default api;
+
+// Добавить в конец файла booksAPI
+
+const booksAPI = {
+    // ... существующие методы ...
+
+    // Закладки
+    getBookmarks: async (bookId) => {
+        const response = await api.get(`/bookmarks/${bookId}`);
+        return response.data;
+    },
+
+    addBookmark: async (bookId, page) => {
+        const response = await api.post(`/bookmarks`, { book_id: bookId, page });
+        return response.data;
+    },
+
+    removeBookmark: async (bookId, page) => {
+        const response = await api.delete(`/bookmarks/${bookId}/${page}`);
+        return response.data;
+    },
+
+    // Заметки
+    getNotes: async (bookId) => {
+        const response = await api.get(`/notes/${bookId}`);
+        return response.data;
+    },
+
+    createNote: async (bookId, page, text) => {
+        const response = await api.post(`/notes`, { book_id: bookId, page, text });
+        return response.data;
+    },
+
+    updateNote: async (noteId, text) => {
+        const response = await api.put(`/notes/${noteId}`, { text });
+        return response.data;
+    },
+
+    deleteNote: async (noteId) => {
+        const response = await api.delete(`/notes/${noteId}`);
+        return response.data;
+    },
+
+    // Модерация
+    reportReview: async (reviewId, reason, comment) => {
+        const response = await api.post(`/reports`, {
+            review_id: reviewId,
+            reason,
+            comment
+        });
+        return response.data;
+    },
+
+    getReports: async () => {
+        const response = await api.get(`/admin/reports`);
+        return response.data;
+    },
+
+    getReportsStats: async () => {
+        const response = await api.get(`/admin/reports/stats`);
+        return response.data;
+    },
+
+    resolveReport: async (reportId, action) => {
+        const response = await api.post(`/admin/reports/${reportId}/resolve`, null, {
+            params: { action }
+        });
+        return response.data;
+    },
+};
+
+export { booksAPI, filtersAPI };
 
 
 ==== FILE: frontend\src\styles\AdminPage.css ====
@@ -8724,6 +10282,363 @@ export default api;
     font-weight: 400;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     text-align: center;
+}
+
+==== FILE: frontend\src\styles\AdvancedSearchFilters.css ====
+/* ============================================
+   ADVANCED SEARCH FILTERS
+   ============================================ */
+
+.advanced-search-filters {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin-bottom: 32px;
+}
+
+/* ============================================
+   SEARCH BAR
+   ============================================ */
+
+.search-bar-wrapper {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: stretch;
+}
+
+.search-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.search-bar:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.search-icon {
+    font-size: 20px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 16px;
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.clear-search-btn,
+.voice-search-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 18px;
+}
+
+.clear-search-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.voice-search-btn {
+    margin-left: 4px;
+}
+
+.voice-search-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.voice-search-btn.listening {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.advanced-toggle {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.advanced-toggle:hover {
+    background: var(--hover-bg);
+    border-color: #667eea;
+}
+
+.advanced-toggle.active {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.advanced-toggle svg {
+    font-size: 18px;
+}
+
+/* ============================================
+   QUICK FILTERS
+   ============================================ */
+
+.quick-filters {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-select {
+    flex: 1;
+    min-width: 160px;
+}
+
+.clear-filters-btn {
+    background: rgba(255, 59, 48, 0.1);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: #ff3b30;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.clear-filters-btn:hover {
+    background: rgba(255, 59, 48, 0.2);
+    transform: translateY(-2px);
+}
+
+.clear-filters-btn svg {
+    font-size: 16px;
+}
+
+/* ============================================
+   ADVANCED FILTERS
+   ============================================ */
+
+.advanced-filters {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.range-inputs input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.range-inputs input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.range-inputs span {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* ============================================
+   LISTENING INDICATOR
+   ============================================ */
+
+.listening-indicator {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 59, 48, 0.05);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.pulse-animation {
+    width: 12px;
+    height: 12px;
+    background: #ff3b30;
+    border-radius: 50%;
+    animation: pulseGrow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseGrow {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+    }
+}
+
+.listening-indicator span {
+    color: #ff3b30;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .advanced-search-filters {
+        padding: 20px;
+    }
+
+    .search-bar-wrapper {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .advanced-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .quick-filters {
+        flex-direction: column;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .clear-filters-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .advanced-filters {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+
+[data-theme='dark'] .search-bar:focus-within {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+[data-theme='dark'] .voice-search-btn.listening {
+    background: rgba(255, 59, 48, 0.15);
 }
 
 ==== FILE: frontend\src\styles\AuthPage.css ====
@@ -11521,6 +13436,217 @@ export default api;
     color: var(--bd-text);
     font-weight: 700;
     animation: fadeIn var(--bd-speed) var(--bd-transition) 0.2s both;
+}
+
+/* ============================================
+   LOADING & ERROR STATES
+   ============================================ */
+
+.loading-container,
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 20px;
+}
+
+.loading-container .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--bd-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error-container h2 {
+    font-size: 24px;
+    color: var(--text-primary);
+}
+
+.error-container button {
+    padding: 12px 24px;
+    background: var(--bd-gradient-primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.error-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ============================================
+   УЛУЧШЕННЫЕ КНОПКИ ДЕЙСТВИЙ
+   ============================================ */
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.action-btn svg {
+    font-size: 18px;
+}
+
+.read-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.read-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #00e965 0%, #00c853 100%);
+    color: white;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 233, 101, 0.4);
+}
+
+.favorite-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.favorite-btn:hover {
+    border-color: #ff1744;
+    color: #ff1744;
+}
+
+.favorite-btn.active {
+    background: rgba(255, 23, 68, 0.1);
+    color: #ff1744;
+    border-color: #ff1744;
+}
+
+.read-status-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.read-status-btn:hover {
+    border-color: #34c759;
+    color: #34c759;
+}
+
+.read-status-btn.active {
+    background: rgba(52, 199, 89, 0.1);
+    color: #34c759;
+    border-color: #34c759;
+}
+
+/* ============================================
+   КНОПКА ЖАЛОБЫ НА ОТЗЫВ
+   ============================================ */
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.review-author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.report-review-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.report-review-btn:hover {
+    background: rgba(255, 149, 0, 0.1);
+    color: #ff9500;
+}
+
+/* ============================================
+   ПУСТОЕ СОСТОЯНИЕ ОТЗЫВОВ
+   ============================================ */
+
+.no-reviews {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px dashed var(--border-color);
+}
+
+.no-reviews p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ============================================
+   АДАПТИВ ДЛЯ НОВЫХ ЭЛЕМЕНТОВ
+   ============================================ */
+
+@media (max-width: 768px) {
+    .book-actions {
+        flex-direction: column;
+    }
+
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .report-review-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
+
+    .review-item {
+        position: relative;
+    }
 }
 
 ==== FILE: frontend\src\styles\BooksPage.css ====
@@ -15677,6 +17803,410 @@ html {
     }
 }
 
+==== FILE: frontend\src\styles\ModerationPage.css css ====
+/* ============================================
+   MODERATION PAGE
+   ============================================ */
+
+.moderation-page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 100px 24px 60px;
+}
+
+.moderation-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.moderation-header {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.moderation-header h1 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+}
+
+.moderation-header p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.moderation-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 16px;
+}
+
+.moderation-loading .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   STATS CARDS
+   ============================================ */
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.stat-icon.pending {
+    background: rgba(255, 149, 0, 0.1);
+    color: #ff9500;
+}
+
+.stat-icon.resolved {
+    background: rgba(52, 199, 89, 0.1);
+    color: #34c759;
+}
+
+.stat-icon.total {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ============================================
+   REPORTS LIST
+   ============================================ */
+
+.reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.report-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.4s ease both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.report-card:nth-child(1) { animation-delay: 0.05s; }
+.report-card:nth-child(2) { animation-delay: 0.1s; }
+.report-card:nth-child(3) { animation-delay: 0.15s; }
+.report-card:nth-child(4) { animation-delay: 0.2s; }
+.report-card:nth-child(5) { animation-delay: 0.25s; }
+
+.report-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.report-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reason-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.reason-badge.spam {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+}
+
+.reason-badge.offensive {
+    background: rgba(255, 149, 0, 0.1);
+    color: #ff9500;
+}
+
+.reason-badge.inappropriate {
+    background: rgba(255, 204, 0, 0.1);
+    color: #ffcc00;
+}
+
+.reason-badge.other {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.report-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.report-reporter {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.report-reporter strong {
+    color: var(--text-primary);
+}
+
+/* ============================================
+   REPORTED REVIEW
+   ============================================ */
+
+.reported-review {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid #ff9500;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.review-author {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.review-author strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.review-text {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* ============================================
+   REPORT COMMENT
+   ============================================ */
+
+.report-comment {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.report-comment strong {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.report-comment p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+
+.report-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.action-btn svg {
+    font-size: 18px;
+}
+
+.action-btn.dismiss {
+    background: linear-gradient(135deg, #34c759 0%, #248a3d 100%);
+    color: white;
+}
+
+.action-btn.dismiss:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
+}
+
+.action-btn.delete {
+    background: linear-gradient(135deg, #ff3b30 0%, #d61b0f 100%);
+    color: white;
+}
+
+.action-btn.delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-state svg {
+    font-size: 64px;
+    color: #34c759;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+}
+
+.empty-state p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .moderation-page {
+        padding: 80px 16px 40px;
+    }
+
+    .moderation-header {
+        margin-bottom: 24px;
+    }
+
+    .stats-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .report-card {
+        padding: 20px;
+    }
+
+    .report-actions {
+        flex-direction: column;
+    }
+
+    .action-btn {
+        min-width: auto;
+    }
+}
+
+
 ==== FILE: frontend\src\styles\PageTemplate.css ====
 /* ==================== UNIVERSAL PAGE TEMPLATE ==================== */
 
@@ -17332,6 +19862,707 @@ html {
     .privacy-section a {
         color: #000;
         text-decoration: underline;
+    }
+}
+
+==== FILE: frontend\src\styles\ReaderPage.css ====
+/* ============================================
+   READER PAGE - ПОЛНОЭКРАННОЕ ЧТЕНИЕ
+   ============================================ */
+
+.reader-container {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    display: grid;
+    grid-template-rows: 60px 1fr 60px;
+    grid-template-columns: 1fr 320px;
+    grid-template-areas:
+        "header header"
+        "viewer sidebar"
+        "nav nav";
+    z-index: 1000;
+}
+
+.reader-container.fullscreen {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "header"
+        "viewer"
+        "nav";
+}
+
+.reader-container.fullscreen .reader-sidebar {
+    display: none;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.reader-header {
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.reader-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.reader-close:hover {
+    background: var(--hover-bg);
+}
+
+.reader-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    text-align: center;
+    margin: 0 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reader-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.reader-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.reader-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.reader-btn.active {
+    color: #ff9500;
+    background: rgba(255, 149, 0, 0.1);
+}
+
+/* ============================================
+   VIEWER
+   ============================================ */
+
+.reader-viewer {
+    grid-area: viewer;
+    background: #525252;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.pdf-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.reader-loading {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    gap: 16px;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
+.reader-sidebar {
+    grid-area: sidebar;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sidebar-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.bookmarks-list,
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bookmark-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.bookmark-item:hover {
+    background: var(--hover-bg);
+}
+
+.bookmark-item button {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    flex: 1;
+    text-align: left;
+}
+
+.bookmark-item .remove-btn {
+    flex: 0;
+    padding: 4px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.bookmark-item .remove-btn:hover {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+}
+
+.note-item {
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border-left: 3px solid #0071e3;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.note-header button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 14px;
+}
+
+.note-header button:hover {
+    color: var(--text-primary);
+}
+
+.note-item p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 16px;
+}
+
+/* ============================================
+   NOTE EDITOR MODAL
+   ============================================ */
+
+.note-editor-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.note-editor {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.note-editor h3 {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    color: var(--text-primary);
+}
+
+.note-editor textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.note-editor textarea:focus {
+    outline: none;
+    border-color: #0071e3;
+}
+
+.note-editor-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    justify-content: flex-end;
+}
+
+.note-editor-actions button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-cancel {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-cancel:hover {
+    background: var(--hover-bg);
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+
+.reader-navigation {
+    grid-area: nav;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 0 24px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: var(--hover-bg);
+    transform: translateY(-2px);
+}
+
+.nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .reader-container {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header"
+            "viewer"
+            "nav";
+    }
+
+    .reader-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .reader-header {
+        padding: 0 12px;
+    }
+
+    .reader-title {
+        font-size: 16px;
+    }
+
+    .reader-controls {
+        gap: 4px;
+    }
+
+    .reader-btn {
+        padding: 6px;
+        font-size: 18px;
+    }
+
+    .reader-navigation {
+        gap: 12px;
+        padding: 0 12px;
+    }
+
+    .nav-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .page-indicator {
+        font-size: 14px;
+    }
+}
+
+==== FILE: frontend\src\styles\ReportModal.css ====
+/* ============================================
+   REPORT MODAL
+   ============================================ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+.report-modal {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    max-width: 540px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-title svg {
+    font-size: 24px;
+    color: #ff9500;
+}
+
+.modal-title h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.report-form {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.review-preview {
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border-left: 3px solid #ff9500;
+}
+
+.review-author {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+    margin: 0 0 8px 0;
+}
+
+.review-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.radio-label:hover {
+    background: var(--hover-bg);
+}
+
+.radio-label input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+    cursor: pointer;
+}
+
+.radio-label input[type="radio"]:checked+span {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.radio-label:has(input:checked) {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+}
+
+.radio-label span {
+    color: var(--text-secondary);
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.2s ease;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    background: var(--bg-primary);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    padding-top: 8px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-cancel:hover {
+    background: var(--hover-bg);
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    .report-modal {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .modal-header {
+        padding: 20px 16px 16px;
+    }
+
+    .report-form {
+        padding: 20px 16px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
     }
 }
 
@@ -19121,6 +22352,157 @@ body:has(.staggered-menu-wrapper[data-open="true"]) .footer {
 
 .sm-logo-text:hover {
     color: inherit !important;
+}
+
+==== FILE: frontend\src\styles\Toast.css ====
+/* ============================================
+   TOAST NOTIFICATION SYSTEM
+   ============================================ */
+
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 320px;
+    max-width: 480px;
+    padding: 16px 20px;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    pointer-events: all;
+    animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 0.3s ease;
+}
+
+.toast:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toast-success {
+    border-left: 4px solid #34c759;
+}
+
+.toast-success .toast-icon {
+    color: #34c759;
+}
+
+.toast-error {
+    border-left: 4px solid #ff3b30;
+}
+
+.toast-error .toast-icon {
+    color: #ff3b30;
+}
+
+.toast-warning {
+    border-left: 4px solid #ff9500;
+}
+
+.toast-warning .toast-icon {
+    color: #ff9500;
+}
+
+.toast-info {
+    border-left: 4px solid #0071e3;
+}
+
+.toast-info .toast-icon {
+    color: #0071e3;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 18px;
+}
+
+.toast-close:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .toast-container {
+        top: 60px;
+        right: 12px;
+        left: 12px;
+    }
+
+    .toast {
+        min-width: auto;
+        max-width: 100%;
+    }
+}
+
+/* Темная тема */
+[data-theme='dark'] .toast {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Анимация выхода */
+.toast.toast-exit {
+    animation: toastSlideOut 0.3s ease forwards;
+}
+
+@keyframes toastSlideOut {
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
 }
 
 ==== FILE: frontend\src\styles\VolunteersPage.css ====

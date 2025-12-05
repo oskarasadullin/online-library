@@ -449,3 +449,187 @@ def get_user_statistics(db: Session, user_id: int) -> dict:
         "reviews_count": reviews_count or 0,
         "ratings_count": ratings_count or 0
     }
+
+# Добавить в конец файла
+
+# ============ MODERATION OPERATIONS ============
+
+def create_review_report(
+    db: Session,
+    review_id: int,
+    reporter_id: int,
+    reason: str,
+    comment: Optional[str] = None
+) -> models.ReviewReport:
+    """Создать жалобу на отзыв"""
+    # Проверяем, не жаловался ли уже этот пользователь
+    existing = db.query(models.ReviewReport).filter(
+        and_(
+            models.ReviewReport.review_id == review_id,
+            models.ReviewReport.reporter_id == reporter_id
+        )
+    ).first()
+    
+    if existing:
+        return existing
+    
+    report = models.ReviewReport(
+        review_id=review_id,
+        reporter_id=reporter_id,
+        reason=reason,
+        comment=comment
+    )
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
+
+def get_pending_reports(db: Session, skip: int = 0, limit: int = 100) -> List[models.ReviewReport]:
+    """Получить список необработанных жалоб"""
+    return db.query(models.ReviewReport).filter(
+        models.ReviewReport.status == "pending"
+    ).order_by(
+        models.ReviewReport.created_at.desc()
+    ).offset(skip).limit(limit).all()
+
+def get_report_by_id(db: Session, report_id: int) -> Optional[models.ReviewReport]:
+    """Получить жалобу по ID"""
+    return db.query(models.ReviewReport).filter(
+        models.ReviewReport.id == report_id
+    ).first()
+
+def resolve_report(
+    db: Session,
+    report_id: int,
+    admin_id: int,
+    action: str  # dismiss, delete_review
+) -> Optional[models.ReviewReport]:
+    """Обработать жалобу"""
+    report = get_report_by_id(db, report_id)
+    if not report:
+        return None
+    
+    report.status = "resolved" if action == "dismiss" else "resolved"
+    report.resolved_at = datetime.utcnow()
+    report.resolved_by = admin_id
+    
+    # Если нужно удалить отзыв
+    if action == "delete_review":
+        delete_review(db, report.review_id)
+    
+    db.commit()
+    db.refresh(report)
+    return report
+
+def get_reports_count(db: Session) -> dict:
+    """Получить статистику по жалобам"""
+    total = db.query(func.count(models.ReviewReport.id)).scalar()
+    pending = db.query(func.count(models.ReviewReport.id)).filter(
+        models.ReviewReport.status == "pending"
+    ).scalar()
+    resolved = db.query(func.count(models.ReviewReport.id)).filter(
+        models.ReviewReport.status == "resolved"
+    ).scalar()
+    
+    return {
+        "total": total or 0,
+        "pending": pending or 0,
+        "resolved": resolved or 0
+    }
+
+# ============ BOOKMARKS OPERATIONS ============
+
+def get_user_bookmarks(db: Session, user_id: int, book_id: int) -> List[models.Bookmark]:
+    """Получить закладки пользователя для книги"""
+    return db.query(models.Bookmark).filter(
+        and_(
+            models.Bookmark.user_id == user_id,
+            models.Bookmark.book_id == book_id
+        )
+    ).order_by(models.Bookmark.page).all()
+
+def add_bookmark(db: Session, user_id: int, book_id: int, page: int) -> models.Bookmark:
+    """Добавить закладку"""
+    # Проверяем, не существует ли уже
+    existing = db.query(models.Bookmark).filter(
+        and_(
+            models.Bookmark.user_id == user_id,
+            models.Bookmark.book_id == book_id,
+            models.Bookmark.page == page
+        )
+    ).first()
+    
+    if existing:
+        return existing
+    
+    bookmark = models.Bookmark(user_id=user_id, book_id=book_id, page=page)
+    db.add(bookmark)
+    db.commit()
+    db.refresh(bookmark)
+    return bookmark
+
+def remove_bookmark(db: Session, user_id: int, book_id: int, page: int) -> bool:
+    """Удалить закладку"""
+    bookmark = db.query(models.Bookmark).filter(
+        and_(
+            models.Bookmark.user_id == user_id,
+            models.Bookmark.book_id == book_id,
+            models.Bookmark.page == page
+        )
+    ).first()
+    
+    if bookmark:
+        db.delete(bookmark)
+        db.commit()
+        return True
+    return False
+
+# ============ NOTES OPERATIONS ============
+
+def get_user_notes(db: Session, user_id: int, book_id: int) -> List[models.Note]:
+    """Получить заметки пользователя для книги"""
+    return db.query(models.Note).filter(
+        and_(
+            models.Note.user_id == user_id,
+            models.Note.book_id == book_id
+        )
+    ).order_by(models.Note.page).all()
+
+def create_note(
+    db: Session,
+    user_id: int,
+    book_id: int,
+    page: int,
+    text: str
+) -> models.Note:
+    """Создать заметку"""
+    note = models.Note(user_id=user_id, book_id=book_id, page=page, text=text)
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return note
+
+def update_note(db: Session, note_id: int, text: str) -> Optional[models.Note]:
+    """Обновить заметку"""
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if note:
+        note.text = text
+        note.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(note)
+    return note
+
+def delete_note(db: Session, note_id: int, user_id: int) -> bool:
+    """Удалить заметку"""
+    note = db.query(models.Note).filter(
+        and_(
+            models.Note.id == note_id,
+            models.Note.user_id == user_id
+        )
+    ).first()
+    
+    if note:
+        db.delete(note)
+        db.commit()
+        return True
+    return False

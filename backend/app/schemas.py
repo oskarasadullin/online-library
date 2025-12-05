@@ -147,3 +147,26 @@ class RatingResponse(RatingBase):
     
     class Config:
         from_attributes = True
+
+# Добавить в конец файла
+
+class ReviewReportCreate(BaseModel):
+    review_id: int
+    reason: str  # spam, offensive, inappropriate
+    comment: Optional[str] = None
+
+class ReviewReportResponse(BaseModel):
+    id: int
+    review_id: int
+    reporter_id: int
+    reason: str
+    comment: Optional[str]
+    status: str
+    created_at: datetime
+    resolved_at: Optional[datetime]
+    resolved_by: Optional[int]
+    review: ReviewResponse
+    reporter_name: str
+    
+    class Config:
+        from_attributes = True

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Iridescence from '../components/Iridescence';
 import BookCard from '../components/BookCard';
-import SearchFilters from '../components/SearchFilters';
+import AdvancedSearchFilters from '../components/AdvancedSearchFilters'; // ✅ ЗАМЕНЕНО
 import { booksAPI } from '../services/api';
 import { HiBookOpen } from 'react-icons/hi';
 import '../styles/BooksPage.css';
@@ -10,6 +10,7 @@ const BooksPage = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({});
+    const [totalResults, setTotalResults] = useState(0); // ✅ НОВОЕ
     const bookCardsRef = useRef([]);
 
     useEffect(() => {
@@ -47,11 +48,24 @@ const BooksPage = () => {
         try {
             const response = await booksAPI.getAll(filters);
             setBooks(response.data);
+            setTotalResults(response.data.length); // ✅ НОВОЕ
         } catch (error) {
             console.error('Error loading books:', error);
+            setBooks([]);
+            setTotalResults(0);
         } finally {
             setLoading(false);
         }
+    };
+
+    // ✅ НОВОЕ: Обработчик фильтров
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+    };
+
+    // ✅ НОВОЕ: Обработчик поиска
+    const handleSearch = (query) => {
+        console.log('Searching for:', query);
     };
 
     return (
@@ -84,8 +98,21 @@ const BooksPage = () => {
             {/* Books Content Section */}
             <div className="books-content-section">
                 <div className="books-controls">
-                    <SearchFilters onFilterChange={setFilters} />
+                    {/* ✅ НОВОЕ: AdvancedSearchFilters вместо SearchFilters */}
+                    <AdvancedSearchFilters
+                        onFilterChange={handleFilterChange}
+                        onSearch={handleSearch}
+                    />
                 </div>
+
+                {/* ✅ НОВОЕ: Счётчик результатов */}
+                {!loading && books.length > 0 && (
+                    <div className="books-results-info">
+                        <p className="results-count">
+                            Найдено книг: <strong>{totalResults}</strong>
+                        </p>
+                    </div>
+                )}
 
                 {loading ? (
                     <div className="books-loading">

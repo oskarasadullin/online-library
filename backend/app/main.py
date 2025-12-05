@@ -561,3 +561,213 @@ def get_authors(db: Session = Depends(get_db)):
 def health_check():
     """Проверка здоровья API"""
     return {"status": "ok", "message": "API работает"}
+
+# Добавить после раздела REVIEWS ENDPOINTS
+
+# ============ MODERATION ENDPOINTS ============
+
+@app.post("/api/reports", response_model=schemas.ReviewReportResponse, status_code=status.HTTP_201_CREATED)
+def create_report(
+    report: schemas.ReviewReportCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Пожаловаться на отзыв"""
+    # Проверяем существование отзыва
+    review = crud.get_review(db, report.review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Отзыв не найден")
+    
+    # Нельзя жаловаться на свой отзыв
+    if review.user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Нельзя жаловаться на свой отзыв")
+    
+    db_report = crud.create_review_report(
+        db, report.review_id, current_user.id, report.reason, report.comment
+    )
+    
+    return schemas.ReviewReportResponse(
+        id=db_report.id,
+        review_id=db_report.review_id,
+        reporter_id=db_report.reporter_id,
+        reason=db_report.reason,
+        comment=db_report.comment,
+        status=db_report.status,
+        created_at=db_report.created_at,
+        resolved_at=db_report.resolved_at,
+        resolved_by=db_report.resolved_by,
+        review=schemas.ReviewResponse(
+            id=review.id,
+            user_id=review.user_id,
+            book_id=review.book_id,
+            text=review.text,
+            created_at=review.created_at,
+            user_name=review.user.full_name
+        ),
+        reporter_name=current_user.full_name
+    )
+
+@app.get("/api/admin/reports", response_model=List[schemas.ReviewReportResponse])
+def get_reports(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """Получить список жалоб (только для админов)"""
+    reports = crud.get_pending_reports(db, skip, limit)
+    
+    result = []
+    for report in reports:
+        result.append(schemas.ReviewReportResponse(
+            id=report.id,
+            review_id=report.review_id,
+            reporter_id=report.reporter_id,
+            reason=report.reason,
+            comment=report.comment,
+            status=report.status,
+            created_at=report.created_at,
+            resolved_at=report.resolved_at,
+            resolved_by=report.resolved_by,
+            review=schemas.ReviewResponse(
+                id=report.review.id,
+                user_id=report.review.user_id,
+                book_id=report.review.book_id,
+                text=report.review.text,
+                created_at=report.review.created_at,
+                user_name=report.review.user.full_name
+            ),
+            reporter_name=report.reporter.full_name
+        ))
+    
+    return result
+
+@app.post("/api/admin/reports/{report_id}/resolve")
+def resolve_report(
+    report_id: int,
+    action: str = Query(..., regex="^(dismiss|delete_review)$"),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """Обработать жалобу (только для админов)"""
+    report = crud.resolve_report(db, report_id, current_user.id, action)
+    if not report:
+        raise HTTPException(status_code=404, detail="Жалоба не найдена")
+    
+    return {"message": "Жалоба обработана", "action": action}
+
+@app.get("/api/admin/reports/stats")
+def get_reports_stats(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin_user)
+):
+    """Получить статистику по жалобам"""
+    return crud.get_reports_count(db)
+
+# ============ BOOKMARKS ENDPOINTS ============
+
+@app.get("/api/bookmarks/{book_id}")
+def get_bookmarks(
+    book_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Получить закладки пользователя для книги"""
+    bookmarks = crud.get_user_bookmarks(db, current_user.id, book_id)
+    return [{"page": b.page, "created_at": b.created_at} for b in bookmarks]
+
+@app.post("/api/bookmarks")
+def add_bookmark(
+    bookmark_data: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Добавить закладку"""
+    book_id = bookmark_data.get("book_id")
+    page = bookmark_data.get("page")
+    
+    if not book_id or not page:
+        raise HTTPException(status_code=400, detail="Необходимы book_id и page")
+    
+    bookmark = crud.add_bookmark(db, current_user.id, book_id, page)
+    return {"message": "Закладка добавлена", "page": bookmark.page}
+
+@app.delete("/api/bookmarks/{book_id}/{page}")
+def remove_bookmark(
+    book_id: int,
+    page: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Удалить закладку"""
+    if crud.remove_bookmark(db, current_user.id, book_id, page):
+        return {"message": "Закладка удалена"}
+    raise HTTPException(status_code=404, detail="Закладка не найдена")
+
+# ============ NOTES ENDPOINTS ============
+
+@app.get("/api/notes/{book_id}")
+def get_notes(
+    book_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Получить заметки пользователя для книги"""
+    notes = crud.get_user_notes(db, current_user.id, book_id)
+    return [{
+        "id": n.id,
+        "page": n.page,
+        "text": n.text,
+        "created_at": n.created_at
+    } for n in notes]
+
+@app.post("/api/notes")
+def create_note(
+    note_data: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Создать заметку"""
+    book_id = note_data.get("book_id")
+    page = note_data.get("page")
+    text = note_data.get("text")
+    
+    if not all([book_id, page, text]):
+        raise HTTPException(status_code=400, detail="Необходимы book_id, page и text")
+    
+    note = crud.create_note(db, current_user.id, book_id, page, text)
+    return {
+        "id": note.id,
+        "page": note.page,
+        "text": note.text,
+        "created_at": note.created_at
+    }
+
+@app.put("/api/notes/{note_id}")
+def update_note(
+    note_id: int,
+    note_data: dict,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Обновить заметку"""
+    text = note_data.get("text")
+    if not text:
+        raise HTTPException(status_code=400, detail="Необходим text")
+    
+    note = crud.update_note(db, note_id, text)
+    if not note:
+        raise HTTPException(status_code=404, detail="Заметка не найдена")
+    
+    return {"message": "Заметка обновлена"}
+
+@app.delete("/api/notes/{note_id}")
+def delete_note(
+    note_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Удалить заметку"""
+    if crud.delete_note(db, note_id, current_user.id):
+        return {"message": "Заметка удалена"}
+    raise HTTPException(status_code=404, detail="Заметка не найдена")
